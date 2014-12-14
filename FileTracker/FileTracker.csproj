@@ -74,6 +74,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="InfrastructureAssemblies\DispatcherDictionary.cs"/>
     <Compile Include="Models\Common.cs" />
     <Compile Include="Models\FolderItem.cs" />
     <Compile Include="Models\Model.cs" />

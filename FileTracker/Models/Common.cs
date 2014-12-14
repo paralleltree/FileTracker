@@ -23,10 +23,5 @@ namespace FileTracker.Models
 
             return sb.ToString();
         }
-
-        ~Common()
-        {
-            HashGenerator.Dispose();
-        }
     }
 }
