@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Livet;
 
 namespace FileTracker.Models
 {
@@ -23,6 +24,8 @@ namespace FileTracker.Models
             set { Watcher.EnableRaisingEvents = value; }
         }
 
+        private DispatcherDictionary<string, FileItem> files;
+        public ReadOnlyDispatcherCollection<KeyValuePair<string, FileItem>> TrackingFiles { get; private set; }
 
         public FolderItem(string path)
         {
@@ -34,6 +37,10 @@ namespace FileTracker.Models
             Watcher.Changed += OnChanged;
             Watcher.Deleted += OnDeleted;
             Watcher.Renamed += OnRenamed;
+            Watcher.Error += OnError;
+
+            files = new DispatcherDictionary<string, FileItem>(DispatcherHelper.UIDispatcher);
+            TrackingFiles = new ReadOnlyDispatcherCollection<KeyValuePair<string, FileItem>>(files);
         }
 
 
@@ -57,6 +64,11 @@ namespace FileTracker.Models
 
         }
 
+        private void OnError(object sender, ErrorEventArgs e)
+        {
+
+        }
+
 
         public void Dispose()
         {
@@ -66,6 +78,7 @@ namespace FileTracker.Models
                 Watcher.Changed -= OnChanged;
                 Watcher.Deleted -= OnDeleted;
                 Watcher.Renamed -= OnRenamed;
+                Watcher.Error -= OnError;
                 Watcher.Dispose();
             }
         }

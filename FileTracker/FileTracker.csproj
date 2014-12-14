@@ -76,6 +76,7 @@
     </Compile>
     <Compile Include="InfrastructureAssemblies\DispatcherDictionary.cs"/>
     <Compile Include="Models\Common.cs" />
+    <Compile Include="Models\FileItem.cs" />
     <Compile Include="Models\FolderItem.cs" />
     <Compile Include="Models\Model.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
