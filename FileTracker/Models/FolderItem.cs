@@ -9,7 +9,7 @@ using Livet;
 
 namespace FileTracker.Models
 {
-    class FolderItem : IDisposable
+    public sealed class FolderItem : IDisposable
     {
         private FileSystemWatcher Watcher { get; set; }
 
@@ -28,6 +28,7 @@ namespace FileTracker.Models
         private DispatcherDictionary<string, FileItem> files;
         public ReadOnlyDispatcherCollection<KeyValuePair<string, FileItem>> TrackingFiles { get; private set; }
 
+
         public FolderItem(string path)
         {
             files = new DispatcherDictionary<string, FileItem>(DispatcherHelper.UIDispatcher);
@@ -37,7 +38,7 @@ namespace FileTracker.Models
             {
                 // スナップフォルダからスナップファイルを検索する
                 var snapped = Directory.GetFiles(snapFolder)
-                    .Select(p => new { Path = p, Match = Regex.Match(p, @"\\(?<hash>[a-z0-9]+)_(?<date>\d{14})(\..+)?\Z") })
+                    .Select(p => new { Path = p, Match = Regex.Match(p, @"\\(?<hash>[a-f0-9]+)_(?<date>\d{14})(\..+)?\Z") })
                     .Where(p => p.Match.Success)
                     .Select(p => new
                     {
@@ -70,9 +71,9 @@ namespace FileTracker.Models
 
             Watcher = new FileSystemWatcher(path)
             {
-                EnableRaisingEvents = true
+                EnableRaisingEvents = true,
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
             };
-            Watcher.Created += OnCreated;
             Watcher.Changed += OnChanged;
             Watcher.Deleted += OnDeleted;
             Watcher.Renamed += OnRenamed;
@@ -80,29 +81,47 @@ namespace FileTracker.Models
         }
 
 
-        private void OnCreated(object sender, FileSystemEventArgs e)
-        {
-
-        }
-
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
-
+            string hash = Common.GetHash(e.Name);
+            if (!files.ContainsKey(hash))
+                files.Add(hash, new FileItem(e.FullPath, Enumerable.Empty<KeyValuePair<DateTime, FileInfo>>()));
+            files[hash].Snap();
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
         {
-
+            string hash = Common.GetHash(e.Name);
+            if (!files.ContainsKey(hash)) return;
+            files[hash].Clear();
+            files.Remove(hash);
         }
 
         private void OnRenamed(object sender, RenamedEventArgs e)
         {
-
+            string hash = Common.GetHash(e.OldName);
+            if (!files.ContainsKey(hash)) return;
+            var item = files[hash];
+            item.Rename(new FileInfo(e.FullPath));
+            files.Remove(hash);
+            files.Add(Common.GetHash(e.Name), item);
         }
 
         private void OnError(object sender, ErrorEventArgs e)
         {
+            var ex = e.GetException();
+            if (ex != null)
+            {
+                System.Diagnostics.Debug.WriteLine("WatcherError: {0}\n{1}\n{2}", ex.GetType().Name, ex.Message, ex.StackTrace);
+            }
 
+            string path = Watcher.Path;
+            Dispose();
+            Watcher = new FileSystemWatcher(path)
+            {
+                EnableRaisingEvents = true,
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
+            };
         }
 
 
@@ -110,7 +129,6 @@ namespace FileTracker.Models
         {
             if (this.Watcher != null)
             {
-                Watcher.Created -= OnCreated;
                 Watcher.Changed -= OnChanged;
                 Watcher.Deleted -= OnDeleted;
                 Watcher.Renamed -= OnRenamed;
