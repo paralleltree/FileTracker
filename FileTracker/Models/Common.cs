@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
@@ -34,6 +35,12 @@ namespace FileTracker.Models
         public static string GetSnapFolder(string parentFolder)
         {
             return parentFolder + (parentFolder.Substring(parentFolder.Length - 1, 1) == @"\" ? "" : @"\") + SnapFolder;
+        }
+
+        public static void CreateSnapFolder(string baseFolder)
+        {
+            var dir = Directory.CreateDirectory(GetSnapFolder(baseFolder));
+            dir.Attributes |= FileAttributes.Hidden;
         }
     }
 }
