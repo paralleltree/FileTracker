@@ -25,13 +25,12 @@ namespace FileTracker.Models
             set { Watcher.EnableRaisingEvents = value; }
         }
 
-        private DispatcherDictionary<string, FileItem> files;
-        public ReadOnlyDispatcherCollection<KeyValuePair<string, FileItem>> TrackingFiles { get; private set; }
+        public DispatcherDictionary<string, FileItem> TrackingFiles { get; private set; }
 
 
         public FolderItem(string path)
         {
-            files = new DispatcherDictionary<string, FileItem>(DispatcherHelper.UIDispatcher);
+            TrackingFiles = new DispatcherDictionary<string, FileItem>(DispatcherHelper.UIDispatcher);
 
             string snapFolder = Common.GetSnapFolder(path);
             if (Directory.Exists(snapFolder))
@@ -63,11 +62,9 @@ namespace FileTracker.Models
                 {
                     string hash = Common.GetHash(file.Substring(file.LastIndexOf(@"\") + 1, file.LastIndexOf(@"\")));
                     if (dic.ContainsKey(hash))
-                        files.Add(hash, new FileItem(new FileInfo(file), dic[hash]));
+                        TrackingFiles.Add(hash, new FileItem(new FileInfo(file), dic[hash]));
                 }
             }
-
-            TrackingFiles = new ReadOnlyDispatcherCollection<KeyValuePair<string, FileItem>>(files);
 
             Watcher = new FileSystemWatcher(path)
             {
@@ -88,27 +85,27 @@ namespace FileTracker.Models
             if (file.Attributes.HasFlag(FileAttributes.Directory)) return;
 
             string hash = Common.GetHash(e.Name);
-            if (!files.ContainsKey(hash))
-                files.Add(hash, new FileItem(file, Enumerable.Empty<KeyValuePair<DateTime, FileInfo>>()));
-            files[hash].Snap();
+            if (!TrackingFiles.ContainsKey(hash))
+                TrackingFiles.Add(hash, new FileItem(file, Enumerable.Empty<KeyValuePair<DateTime, FileInfo>>()));
+            TrackingFiles[hash].Snap();
         }
 
         private void OnDeleted(object sender, FileSystemEventArgs e)
         {
             string hash = Common.GetHash(e.Name);
-            if (!files.ContainsKey(hash)) return;
-            files[hash].Clear();
-            files.Remove(hash);
+            if (!TrackingFiles.ContainsKey(hash)) return;
+            TrackingFiles[hash].Clear();
+            TrackingFiles.Remove(hash);
         }
 
         private void OnRenamed(object sender, RenamedEventArgs e)
         {
             string hash = Common.GetHash(e.OldName);
-            if (!files.ContainsKey(hash)) return;
-            var item = files[hash];
+            if (!TrackingFiles.ContainsKey(hash)) return;
+            var item = TrackingFiles[hash];
             item.Rename(new FileInfo(e.FullPath));
-            files.Remove(hash);
-            files.Add(Common.GetHash(e.Name), item);
+            TrackingFiles.Remove(hash);
+            TrackingFiles.Add(Common.GetHash(e.Name), item);
         }
 
         private void OnError(object sender, ErrorEventArgs e)

@@ -13,18 +13,15 @@ namespace FileTracker.Models
     {
         public FileInfo Source { get; private set; }
         private string Hash { get; set; }
-        private DispatcherDictionary<DateTime, FileInfo> files;
-        public ReadOnlyDispatcherCollection<KeyValuePair<DateTime, FileInfo>> SnappedFiles { get; private set; }
+        public DispatcherDictionary<DateTime, FileInfo> SnappedFiles { get; private set; }
 
         public FileItem(FileInfo source, IEnumerable<KeyValuePair<DateTime, FileInfo>> snapped)
         {
             this.Source = source;
             this.Hash = Common.GetHash(Source.Name);
-            files = new DispatcherDictionary<DateTime, FileInfo>(DispatcherHelper.UIDispatcher);
+            SnappedFiles = new DispatcherDictionary<DateTime, FileInfo>(DispatcherHelper.UIDispatcher);
             foreach (var f in snapped)
-                files.Add(f);
-
-            SnappedFiles = new ReadOnlyDispatcherCollection<KeyValuePair<DateTime, FileInfo>>(files);
+                SnappedFiles.Add(f);
         }
 
 
@@ -39,26 +36,26 @@ namespace FileTracker.Models
             if (!Directory.Exists(snapFolder))
                 Common.CreateSnapFolder(Source.Directory.FullName);
 
-            if (files.ContainsKey(date))
+            if (SnappedFiles.ContainsKey(date))
             {
                 Source.CopyTo(dest, true);
-                files[date].Refresh();
+                SnappedFiles[date].Refresh();
             }
             else
             {
                 Source.CopyTo(dest);
-                files.Add(new KeyValuePair<DateTime, FileInfo>(date, new FileInfo(dest)));
+                SnappedFiles.Add(new KeyValuePair<DateTime, FileInfo>(date, new FileInfo(dest)));
             }
         }
 
         public void Rename(FileInfo newfile)
         {
             string hash = Common.GetHash(newfile.Name);
-            foreach (var f in files)
+            foreach (var f in SnappedFiles)
                 f.Value.MoveTo(f.Value.FullName.Replace(this.Hash, hash));
 
-            foreach (DateTime key in files.Keys.ToList())
-                files[key] = new FileInfo(files[key].FullName.Replace(this.Hash, hash));
+            foreach (DateTime key in SnappedFiles.Keys.ToList())
+                SnappedFiles[key] = new FileInfo(SnappedFiles[key].FullName.Replace(this.Hash, hash));
 
             this.Source = newfile;
             this.Hash = hash;
@@ -66,16 +63,16 @@ namespace FileTracker.Models
 
         public void Clear()
         {
-            foreach (var f in files)
+            foreach (var f in SnappedFiles)
                 f.Value.Delete();
 
-            files.Clear();
+            SnappedFiles.Clear();
         }
 
         public void Restore(DateTime date)
         {
-            if (!files.ContainsKey(date)) throw new ArgumentException("指定の日時のスナップファイルは検出されませんでした。");
-            files[date].CopyTo(string.Format(@"{0}\{1}_{2}{3}", Source.Directory.FullName, Source.Name.Replace(Source.Extension, ""), date.ToString(Common.DateFormat), Source.Extension));
+            if (!SnappedFiles.ContainsKey(date)) throw new ArgumentException("指定の日時のスナップファイルは検出されませんでした。");
+            SnappedFiles[date].CopyTo(string.Format(@"{0}\{1}_{2}{3}", Source.Directory.FullName, Source.Name.Replace(Source.Extension, ""), date.ToString(Common.DateFormat), Source.Extension));
         }
     }
 }
