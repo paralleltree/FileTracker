@@ -12,7 +12,7 @@ using System.Windows.Threading;
 namespace Livet
 {
     public class DispatcherDictionary<TKey, TValue> : DispatcherCollection<KeyValuePair<TKey, TValue>>,
-        IDictionary<TKey, TValue>, ICollection, INotifyCollectionChanged, INotifyPropertyChanged
+        IDictionary<TKey, TValue>
     {
         private Dictionary<TKey, TValue> dictionary;
         //private object _syncRoot = new object();
@@ -88,8 +88,8 @@ namespace Livet
         /// <param name="value">キーに関連付ける要素</param>
         public void Add(TKey key, TValue value)
         {
-            base.Add(new KeyValuePair<TKey, TValue>(key, value));
             dictionary.Add(key, value);
+            base.Add(new KeyValuePair<TKey, TValue>(key, value));
         }
 
         /// <summary>
