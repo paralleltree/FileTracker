@@ -16,9 +16,9 @@ namespace FileTracker.Models
         private DispatcherDictionary<DateTime, FileInfo> files;
         public ReadOnlyDispatcherCollection<KeyValuePair<DateTime, FileInfo>> SnappedFiles { get; private set; }
 
-        public FileItem(string sourcePath, IEnumerable<KeyValuePair<DateTime, FileInfo>> snapped)
+        public FileItem(FileInfo source, IEnumerable<KeyValuePair<DateTime, FileInfo>> snapped)
         {
-            this.Source = new FileInfo(sourcePath);
+            this.Source = source;
             this.Hash = Common.GetHash(Source.Name);
             files = new DispatcherDictionary<DateTime, FileInfo>(DispatcherHelper.UIDispatcher);
             foreach (var f in snapped)

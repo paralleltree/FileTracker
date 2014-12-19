@@ -24,7 +24,7 @@ namespace FileTracker.Models
             foreach (byte b in result)
                 sb.AppendFormat("{0:x2}", b);
 
-            return sb.ToString().Substring(HashLength);
+            return sb.ToString().Substring(0, HashLength);
         }
 
         /// <summary>

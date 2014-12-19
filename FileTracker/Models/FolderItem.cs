@@ -63,7 +63,7 @@ namespace FileTracker.Models
                 {
                     string hash = Common.GetHash(file.Substring(file.LastIndexOf(@"\") + 1, file.LastIndexOf(@"\")));
                     if (dic.ContainsKey(hash))
-                        files.Add(hash, new FileItem(file, dic[hash]));
+                        files.Add(hash, new FileItem(new FileInfo(file), dic[hash]));
                 }
             }
 
@@ -83,9 +83,13 @@ namespace FileTracker.Models
 
         private void OnChanged(object sender, FileSystemEventArgs e)
         {
+            // ディレクトリ作成イベントも流れてくる
+            var file = new FileInfo(e.FullPath);
+            if (file.Attributes.HasFlag(FileAttributes.Directory)) return;
+
             string hash = Common.GetHash(e.Name);
             if (!files.ContainsKey(hash))
-                files.Add(hash, new FileItem(e.FullPath, Enumerable.Empty<KeyValuePair<DateTime, FileInfo>>()));
+                files.Add(hash, new FileItem(file, Enumerable.Empty<KeyValuePair<DateTime, FileInfo>>()));
             files[hash].Snap();
         }
 
