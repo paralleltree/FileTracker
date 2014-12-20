@@ -13,7 +13,7 @@ namespace FileTracker.Models
         public static readonly string SnapFolder = @".snap\";
         public static readonly int HashLength = 7;
         public static readonly string DateFormat = "yyMMddHHmmssff";
-        private static readonly Encoding Encoder = Encoding.UTF8;
+        public static readonly Encoding Encoder = Encoding.UTF8;
         private static readonly HashAlgorithm HashGenerator = new SHA1Cng();
 
         public static string GetHash(string input)

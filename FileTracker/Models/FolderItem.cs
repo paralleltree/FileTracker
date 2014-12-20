@@ -38,6 +38,8 @@ namespace FileTracker.Models
 
         public FolderItem(string path)
         {
+            if (!Directory.Exists(path)) throw new DirectoryNotFoundException("指定のディレクトリは見つかりませんでした。");
+
             TrackingFiles = new DispatcherDictionary<string, FileItem>(DispatcherHelper.UIDispatcher);
 
             string snapFolder = Common.GetSnapFolder(path);

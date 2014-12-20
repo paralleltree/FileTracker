@@ -79,6 +79,13 @@ namespace FileTracker.Models
             SnappedFiles.Clear();
         }
 
+        public void Remove(DateTime date)
+        {
+            if (!SnappedFiles.ContainsKey(date)) throw new ArgumentException("指定の日時のスナップファイルは検出されませんでした。");
+            SnappedFiles[date].Delete();
+            SnappedFiles.Remove(date);
+        }
+
         public void Restore(DateTime date)
         {
             if (!SnappedFiles.ContainsKey(date)) throw new ArgumentException("指定の日時のスナップファイルは検出されませんでした。");
