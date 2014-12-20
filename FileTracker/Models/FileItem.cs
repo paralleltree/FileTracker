@@ -9,9 +9,19 @@ using Livet;
 
 namespace FileTracker.Models
 {
-    public sealed class FileItem
+    public sealed class FileItem : NotificationObject
     {
-        public FileInfo Source { get; private set; }
+        private FileInfo _source;
+        public FileInfo Source
+        {
+            get { return _source; }
+            private set
+            {
+                if (_source == value) return;
+                _source = value;
+                RaisePropertyChanged();
+            }
+        }
         private string Hash { get; set; }
         public DispatcherDictionary<DateTime, FileInfo> SnappedFiles { get; private set; }
 

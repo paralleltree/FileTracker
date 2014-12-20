@@ -9,20 +9,28 @@ using Livet;
 
 namespace FileTracker.Models
 {
-    public sealed class FolderItem : IDisposable
+    public sealed class FolderItem : NotificationObject, IDisposable
     {
         private FileSystemWatcher Watcher { get; set; }
 
         public string Path
         {
             get { return Watcher.Path; }
-            set { Watcher.Path = value.Substring(value.Length - 1, 1) == @"\" ? value : value + @"\"; }
+            set
+            {
+                Watcher.Path = value.Substring(value.Length - 1, 1) == @"\" ? value : value + @"\";
+                RaisePropertyChanged();
+            }
         }
 
         public bool IsWatching
         {
             get { return Watcher.EnableRaisingEvents; }
-            set { Watcher.EnableRaisingEvents = value; }
+            set
+            {
+                Watcher.EnableRaisingEvents = value;
+                RaisePropertyChanged();
+            }
         }
 
         public DispatcherDictionary<string, FileItem> TrackingFiles { get; private set; }
@@ -60,9 +68,10 @@ namespace FileTracker.Models
                 // スナップファイルが存在すればFileItemを追加
                 foreach (string file in Directory.GetFiles(path))
                 {
-                    string hash = Common.GetHash(file.Substring(file.LastIndexOf(@"\") + 1, file.LastIndexOf(@"\")));
+                    var info = new FileInfo(file);
+                    string hash = Common.GetHash(info.Name);
                     if (dic.ContainsKey(hash))
-                        TrackingFiles.Add(hash, new FileItem(new FileInfo(file), dic[hash]));
+                        TrackingFiles.Add(hash, new FileItem(info, dic[hash]));
                 }
             }
 
