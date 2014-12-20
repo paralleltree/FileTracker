@@ -15,7 +15,7 @@ using FileTracker.Models;
 
 namespace FileTracker.ViewModels
 {
-    public class MainWindowViewModel : ViewModel
+    public class FolderItemViewModel : ViewModel
     {
         /* コマンド、プロパティの定義にはそれぞれ 
          * 
@@ -59,22 +59,20 @@ namespace FileTracker.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
-        private Model Model { get; set; }
-
-        public ReadOnlyDispatcherCollection<FolderItemViewModel> TrackingFolders { get; private set; }
-
-        public void Initialize()
+        private FolderItem Source { get; set; }
+        public ReadOnlyDispatcherCollection<FileItemViewModel> TrackingFiles { get; private set; }
+        public string Path { get { return Source.Path; } }
+        public bool IsWatching
         {
-            Model = Model.Instance;
-            TrackingFolders = ViewModelHelper.CreateReadOnlyDispatcherCollection(Model.TrackingFolders, p => new FolderItemViewModel(p), DispatcherHelper.UIDispatcher);
-            RaisePropertyChanged("TrackingFolders");
+            get { return Source.IsWatching; }
+            set { Source.IsWatching = value; }
         }
 
-
-        protected override void Dispose(bool disposing)
+        public FolderItemViewModel(FolderItem source)
         {
-            Model.Dispose();
-            base.Dispose(disposing);
+            this.Source = source;
+            TrackingFiles = ViewModelHelper.CreateReadOnlyDispatcherCollection(Source.TrackingFiles, p => new FileItemViewModel(p.Value), DispatcherHelper.UIDispatcher);
+            Source.PropertyChanged += (sender, e) => RaisePropertyChanged(e.PropertyName);
         }
     }
 }
