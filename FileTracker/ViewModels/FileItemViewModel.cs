@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
@@ -16,7 +15,7 @@ using FileTracker.Models;
 
 namespace FileTracker.ViewModels
 {
-    public class MainWindowViewModel : ViewModel
+    public class FileItemViewModel : ViewModel
     {
         /* コマンド、プロパティの定義にはそれぞれ 
          * 
@@ -60,70 +59,118 @@ namespace FileTracker.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
-        private Model Model { get; set; }
+        public FileItem Source { get; private set; }
+        public string Name { get { return Source.Source.Name; } }
+        public DateTime LastWriteTime { get { return Source.Source.LastWriteTime; } }
+        public ReadOnlyDispatcherCollection<KeyValuePair<DateTime, System.IO.FileInfo>> SnappedFiles { get; private set; }
 
-        public ReadOnlyDispatcherCollection<FolderItemViewModel> TrackingFolders { get; private set; }
-
-        public void Initialize()
+        public FileItemViewModel(FileItem source)
         {
-            Model = Model.Instance;
-            TrackingFolders = ViewModelHelper.CreateReadOnlyDispatcherCollection(Model.TrackingFolders, p => new FolderItemViewModel(p), DispatcherHelper.UIDispatcher);
-            RaisePropertyChanged("TrackingFolders");
+            this.Source = source;
+            SnappedFiles = ViewModelHelper.CreateReadOnlyDispatcherCollection(Source.SnappedFiles, p => p, DispatcherHelper.UIDispatcher);
+            Source.PropertyChanged += (sender, e) => RaisePropertyChanged(e.PropertyName);
         }
 
 
-        #region AddFolderCommand
-        private ListenerCommand<string> _AddFolderCommand;
+        #region SnapCommand
+        private ViewModelCommand _SnapCommand;
 
-        public ListenerCommand<string> AddFolderCommand
-        {
-            get
-            {
-                if (_AddFolderCommand == null)
-                {
-                    _AddFolderCommand = new ListenerCommand<string>(AddFolder);
-                }
-                return _AddFolderCommand;
-            }
-        }
-
-        public void AddFolder(string parameter)
-        {
-            if (!Directory.Exists(parameter))
-            {
-                Messenger.Raise(new InformationMessage("指定のフォルダは見つかりませんでした。", "エラー", System.Windows.MessageBoxImage.Exclamation, "InformationMessage"));
-                return;
-            }
-            Model.AddFolder(parameter);
-        }
-        #endregion
-
-        #region RemoveFolderCommand
-        private ListenerCommand<FolderItemViewModel> _RemoveFolderCommand;
-
-        public ListenerCommand<FolderItemViewModel> RemoveFolderCommand
+        public ViewModelCommand SnapCommand
         {
             get
             {
-                if (_RemoveFolderCommand == null)
+                if (_SnapCommand == null)
                 {
-                    _RemoveFolderCommand = new ListenerCommand<FolderItemViewModel>(RemoveFolder);
+                    _SnapCommand = new ViewModelCommand(Snap);
                 }
-                return _RemoveFolderCommand;
+                return _SnapCommand;
             }
         }
 
-        public void RemoveFolder(FolderItemViewModel parameter)
+        public void Snap()
         {
-            Model.RemoveFolder(parameter.Source);
+            Source.Snap();
+        }
+        #endregion
+
+        #region RemoveCommand
+        private ListenerCommand<DateTime> _RemoveCommand;
+
+        public ListenerCommand<DateTime> RemoveCommand
+        {
+            get
+            {
+                if (_RemoveCommand == null)
+                {
+                    _RemoveCommand = new ListenerCommand<DateTime>(Remove, CanRemove);
+                }
+                return _RemoveCommand;
+            }
+        }
+
+        public bool CanRemove()
+        {
+            return SnappedFiles.Count > 0;
+        }
+
+        public void Remove(DateTime parameter)
+        {
+            Source.Remove(parameter);
+        }
+        #endregion
+
+        #region ClearCommand
+        private ViewModelCommand _ClearCommand;
+
+        public ViewModelCommand ClearCommand
+        {
+            get
+            {
+                if (_ClearCommand == null)
+                {
+                    _ClearCommand = new ViewModelCommand(Clear, CanClear);
+                }
+                return _ClearCommand;
+            }
+        }
+
+        public bool CanClear()
+        {
+            return SnappedFiles.Count > 0;
+        }
+
+        public void Clear()
+        {
+            Source.Clear();
+        }
+        #endregion
+
+        #region RestoreCommand
+        private ListenerCommand<DateTime> _RestoreCommand;
+
+        public ListenerCommand<DateTime> RestoreCommand
+        {
+            get
+            {
+                if (_RestoreCommand == null)
+                {
+                    _RestoreCommand = new ListenerCommand<DateTime>(Restore, CanRestore);
+                }
+                return _RestoreCommand;
+            }
+        }
+
+        public bool CanRestore()
+        {
+            return SnappedFiles.Count > 0;
+        }
+
+        public void Restore(DateTime parameter)
+        {
+            Source.Restore(parameter);
         }
         #endregion
 
 
-        protected override void Dispose(bool disposing)
-        {
-            Model.Dispose();
-            base.Dispose(disposing);
-        }
     }
 }

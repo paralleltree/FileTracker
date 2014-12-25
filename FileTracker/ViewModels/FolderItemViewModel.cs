@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
@@ -16,7 +15,7 @@ using FileTracker.Models;
 
 namespace FileTracker.ViewModels
 {
-    public class MainWindowViewModel : ViewModel
+    public class FolderItemViewModel : ViewModel
     {
         /* コマンド、プロパティの定義にはそれぞれ 
          * 
@@ -60,70 +59,20 @@ namespace FileTracker.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
-        private Model Model { get; set; }
-
-        public ReadOnlyDispatcherCollection<FolderItemViewModel> TrackingFolders { get; private set; }
-
-        public void Initialize()
+        public FolderItem Source { get; private set; }
+        public ReadOnlyDispatcherCollection<FileItemViewModel> TrackingFiles { get; private set; }
+        public string Path { get { return Source.Path; } }
+        public bool IsWatching
         {
-            Model = Model.Instance;
-            TrackingFolders = ViewModelHelper.CreateReadOnlyDispatcherCollection(Model.TrackingFolders, p => new FolderItemViewModel(p), DispatcherHelper.UIDispatcher);
-            RaisePropertyChanged("TrackingFolders");
+            get { return Source.IsWatching; }
+            set { Source.IsWatching = value; }
         }
 
-
-        #region AddFolderCommand
-        private ListenerCommand<string> _AddFolderCommand;
-
-        public ListenerCommand<string> AddFolderCommand
+        public FolderItemViewModel(FolderItem source)
         {
-            get
-            {
-                if (_AddFolderCommand == null)
-                {
-                    _AddFolderCommand = new ListenerCommand<string>(AddFolder);
-                }
-                return _AddFolderCommand;
-            }
-        }
-
-        public void AddFolder(string parameter)
-        {
-            if (!Directory.Exists(parameter))
-            {
-                Messenger.Raise(new InformationMessage("指定のフォルダは見つかりませんでした。", "エラー", System.Windows.MessageBoxImage.Exclamation, "InformationMessage"));
-                return;
-            }
-            Model.AddFolder(parameter);
-        }
-        #endregion
-
-        #region RemoveFolderCommand
-        private ListenerCommand<FolderItemViewModel> _RemoveFolderCommand;
-
-        public ListenerCommand<FolderItemViewModel> RemoveFolderCommand
-        {
-            get
-            {
-                if (_RemoveFolderCommand == null)
-                {
-                    _RemoveFolderCommand = new ListenerCommand<FolderItemViewModel>(RemoveFolder);
-                }
-                return _RemoveFolderCommand;
-            }
-        }
-
-        public void RemoveFolder(FolderItemViewModel parameter)
-        {
-            Model.RemoveFolder(parameter.Source);
-        }
-        #endregion
-
-
-        protected override void Dispose(bool disposing)
-        {
-            Model.Dispose();
-            base.Dispose(disposing);
+            this.Source = source;
+            TrackingFiles = ViewModelHelper.CreateReadOnlyDispatcherCollection(Source.TrackingFiles, p => new FileItemViewModel(p.Value), DispatcherHelper.UIDispatcher);
+            Source.PropertyChanged += (sender, e) => RaisePropertyChanged(e.PropertyName);
         }
     }
 }
