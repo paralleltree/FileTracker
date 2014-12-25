@@ -59,7 +59,7 @@ namespace FileTracker.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
-        private FolderItem Source { get; set; }
+        public FolderItem Source { get; private set; }
         public ReadOnlyDispatcherCollection<FileItemViewModel> TrackingFiles { get; private set; }
         public string Path { get { return Source.Path; } }
         public bool IsWatching

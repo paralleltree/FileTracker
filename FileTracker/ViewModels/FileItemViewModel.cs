@@ -59,7 +59,7 @@ namespace FileTracker.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
-        private FileItem Source { get; set; }
+        public FileItem Source { get; private set; }
         public string Name { get { return Source.Source.Name; } }
         public DateTime LastWriteTime { get { return Source.Source.LastWriteTime; } }
         public ReadOnlyDispatcherCollection<KeyValuePair<DateTime, System.IO.FileInfo>> SnappedFiles { get; private set; }
@@ -70,5 +70,107 @@ namespace FileTracker.ViewModels
             SnappedFiles = ViewModelHelper.CreateReadOnlyDispatcherCollection(Source.SnappedFiles, p => p, DispatcherHelper.UIDispatcher);
             Source.PropertyChanged += (sender, e) => RaisePropertyChanged(e.PropertyName);
         }
+
+
+        #region SnapCommand
+        private ViewModelCommand _SnapCommand;
+
+        public ViewModelCommand SnapCommand
+        {
+            get
+            {
+                if (_SnapCommand == null)
+                {
+                    _SnapCommand = new ViewModelCommand(Snap);
+                }
+                return _SnapCommand;
+            }
+        }
+
+        public void Snap()
+        {
+            Source.Snap();
+        }
+        #endregion
+
+        #region RemoveCommand
+        private ListenerCommand<DateTime> _RemoveCommand;
+
+        public ListenerCommand<DateTime> RemoveCommand
+        {
+            get
+            {
+                if (_RemoveCommand == null)
+                {
+                    _RemoveCommand = new ListenerCommand<DateTime>(Remove, CanRemove);
+                }
+                return _RemoveCommand;
+            }
+        }
+
+        public bool CanRemove()
+        {
+            return SnappedFiles.Count > 0;
+        }
+
+        public void Remove(DateTime parameter)
+        {
+            Source.Remove(parameter);
+        }
+        #endregion
+
+        #region ClearCommand
+        private ViewModelCommand _ClearCommand;
+
+        public ViewModelCommand ClearCommand
+        {
+            get
+            {
+                if (_ClearCommand == null)
+                {
+                    _ClearCommand = new ViewModelCommand(Clear, CanClear);
+                }
+                return _ClearCommand;
+            }
+        }
+
+        public bool CanClear()
+        {
+            return SnappedFiles.Count > 0;
+        }
+
+        public void Clear()
+        {
+            Source.Clear();
+        }
+        #endregion
+
+        #region RestoreCommand
+        private ListenerCommand<DateTime> _RestoreCommand;
+
+        public ListenerCommand<DateTime> RestoreCommand
+        {
+            get
+            {
+                if (_RestoreCommand == null)
+                {
+                    _RestoreCommand = new ListenerCommand<DateTime>(Restore, CanRestore);
+                }
+                return _RestoreCommand;
+            }
+        }
+
+        public bool CanRestore()
+        {
+            return SnappedFiles.Count > 0;
+        }
+
+        public void Restore(DateTime parameter)
+        {
+            Source.Restore(parameter);
+        }
+        #endregion
+
+
     }
 }

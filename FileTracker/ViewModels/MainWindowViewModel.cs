@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
@@ -69,6 +70,54 @@ namespace FileTracker.ViewModels
             TrackingFolders = ViewModelHelper.CreateReadOnlyDispatcherCollection(Model.TrackingFolders, p => new FolderItemViewModel(p), DispatcherHelper.UIDispatcher);
             RaisePropertyChanged("TrackingFolders");
         }
+
+
+        #region AddFolderCommand
+        private ListenerCommand<string> _AddFolderCommand;
+
+        public ListenerCommand<string> AddFolderCommand
+        {
+            get
+            {
+                if (_AddFolderCommand == null)
+                {
+                    _AddFolderCommand = new ListenerCommand<string>(AddFolder);
+                }
+                return _AddFolderCommand;
+            }
+        }
+
+        public void AddFolder(string parameter)
+        {
+            if (!Directory.Exists(parameter))
+            {
+                Messenger.Raise(new InformationMessage("指定のフォルダは見つかりませんでした。", "エラー", System.Windows.MessageBoxImage.Exclamation, "InformationMessage"));
+                return;
+            }
+            Model.AddFolder(parameter);
+        }
+        #endregion
+
+        #region RemoveFolderCommand
+        private ListenerCommand<FolderItemViewModel> _RemoveFolderCommand;
+
+        public ListenerCommand<FolderItemViewModel> RemoveFolderCommand
+        {
+            get
+            {
+                if (_RemoveFolderCommand == null)
+                {
+                    _RemoveFolderCommand = new ListenerCommand<FolderItemViewModel>(RemoveFolder);
+                }
+                return _RemoveFolderCommand;
+            }
+        }
+
+        public void RemoveFolder(FolderItemViewModel parameter)
+        {
+            Model.RemoveFolder(parameter.Source);
+        }
+        #endregion
 
 
         protected override void Dispose(bool disposing)

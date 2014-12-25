@@ -35,6 +35,10 @@
         </i:EventTrigger>
 
         <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
+
+        <l:InteractionMessageTrigger MessageKey="InformationMessage" Messenger="{Binding Messenger}">
+            <l:InformationDialogInteractionMessageAction/>
+        </l:InteractionMessageTrigger>
     </i:Interaction.Triggers>
 
     <Grid Margin="1">
@@ -50,10 +54,21 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <TextBlock Text="対象フォルダ"/>
-            <ListBox Grid.Row="1" Name="Folders" ItemsSource="{Binding TrackingFolders}" IsSynchronizedWithCurrentItem="False" SelectionMode="Extended">
+            <ListBox Grid.Row="1" Name="FolderList" ItemsSource="{Binding TrackingFolders}" IsSynchronizedWithCurrentItem="False">
+                <ListBox.Resources>
+                    <ContextMenu x:Key="cm">
+                        <MenuItem Header="削除" FontWeight="Bold"
+                                  Command="{Binding DataContext.RemoveFolderCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
+                                  CommandParameter="{Binding}"/>
+                    </ContextMenu>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="ContextMenu" Value="{StaticResource cm}"/>
+                    </Style>
+                </ListBox.Resources>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -63,6 +78,17 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+            <Grid Grid.Row="2" Margin="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Margin="1" Name="PathText" Text="" />
+                <Button Grid.Column="1" Margin="1" Content="追加"
+                        Command="{Binding AddFolderCommand}"
+                        CommandParameter="{Binding Text, ElementName=PathText}"/>
+            </Grid>
         </Grid>
         <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center"/>
         <Grid Grid.Column="2" Margin="1">
@@ -72,7 +98,20 @@
             </Grid.RowDefinitions>
 
             <TextBlock Text="追跡ファイル"/>
-            <ListView Name="Files" Grid.Row="1" ItemsSource="{Binding SelectedItem.TrackingFiles, ElementName=Folders}">
+            <ListView Name="FileList" Grid.Row="1" ItemsSource="{Binding SelectedItem.TrackingFiles, ElementName=FolderList}" SelectionMode="Single">
+                <ListView.Resources>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="ContextMenu">
+                            <Setter.Value>
+                                <ContextMenu>
+                                    <MenuItem Header="スナップする" FontWeight="Bold" Command="{Binding SnapCommand}"/>
+                                    <MenuItem Header="スナップファイルをクリア" Command="{Binding ClearCommand}"/>
+                                </ContextMenu>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+
+                </ListView.Resources>
                 <ListView.View>
                     <GridView AllowsColumnReorder="True">
                         <GridViewColumn Header="ファイル名" DisplayMemberBinding="{Binding Name}" Width="160"/>
@@ -89,11 +128,20 @@
             </Grid.RowDefinitions>
 
             <TextBlock Text="スナップファイル"/>
-            <ListView Grid.Row="1" ItemsSource="{Binding SelectedItem.SnappedFiles, ElementName=Files}">
+            <ListView Name="SnappedList" Grid.Row="1" DataContext="{Binding SelectedItem, ElementName=FileList}" ItemsSource="{Binding SnappedFiles}" SelectionMode="Single">
                 <ListView.Resources>
+                    <ContextMenu x:Key="cm">
+                        <MenuItem Header="復元" FontWeight="Bold"
+                                  Command="{Binding DataContext.RestoreCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                  CommandParameter="{Binding Key}"/>
+                        <MenuItem Header="削除"
+                                  Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
+                                  CommandParameter="{Binding Key}"/>
+                    </ContextMenu>
                     <!-- 右寄せにしたい…右寄せにしたくない？ -->
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="ContextMenu" Value="{StaticResource cm}"/>
                     </Style>
                 </ListView.Resources>
                 <ListView.View>
