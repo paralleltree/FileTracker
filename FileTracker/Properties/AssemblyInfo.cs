@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("FileTracker")]
-[assembly: AssemblyCopyright("Copyright c  2011")]
+[assembly: AssemblyCopyright("Copyright (C) 2014 paralleltree")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
