@@ -82,6 +82,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converters\ByteSizeConverter.cs" />
     <Compile Include="InfrastructureAssemblies\DispatcherDictionary.cs" />
     <Compile Include="Models\Common.cs" />
     <Compile Include="Models\FileItem.cs" />
@@ -128,6 +129,7 @@
     <Content Include="InfrastructureAssemblies\System.Windows.Interactivity.dll" />
     <Resource Include="Resources\MainIcon.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
