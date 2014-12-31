@@ -6,15 +6,17 @@
         xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
         xmlns:v="clr-namespace:FileTracker.Views"
         xmlns:vm="clr-namespace:FileTracker.ViewModels"
+        xmlns:conv="clr-namespace:FileTracker.Converters"
         Title="FileTracker"
         Icon="../Resources/MainIcon.ico"
-        Height="350" Width="700">
+        Height="350" Width="780">
 
     <Window.DataContext>
         <vm:MainWindowViewModel/>
     </Window.DataContext>
 
     <Window.Resources>
+        <conv:ByteSizeConverter x:Key="ByteSizeConverter"/>
         <Style TargetType="GridViewColumnHeader">
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
         </Style>
@@ -116,7 +118,7 @@
                 </ListView.Resources>
                 <ListView.View>
                     <GridView AllowsColumnReorder="True">
-                        <GridViewColumn Header="ファイル名" DisplayMemberBinding="{Binding Name}" Width="160"/>
+                        <GridViewColumn Header="ファイル名" DisplayMemberBinding="{Binding Name}" Width="180"/>
                         <GridViewColumn Header="最終書き込み" DisplayMemberBinding="{Binding LastWriteTime, StringFormat={}yyyy/MM/dd HH:mm:ss}" Width="144"/>
                     </GridView>
                 </ListView.View>
@@ -149,11 +151,11 @@
                 <ListView.View>
                     <GridView AllowsColumnReorder="True">
                         <GridViewColumn Header="スナップ日時" DisplayMemberBinding="{Binding Key, StringFormat={}yyyy/MM/dd HH:mm:ss}" Width="144"/>
-                        <GridViewColumn Header="サイズ" Width="60">
+                        <GridViewColumn Header="サイズ" Width="80">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <!-- 右に寄せていこうな -->
-                                    <TextBlock Text="{Binding Value.Length}" HorizontalAlignment="Right"/>
+                                    <TextBlock Text="{Binding Value.Length, Converter={StaticResource ByteSizeConverter}}" HorizontalAlignment="Right"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
