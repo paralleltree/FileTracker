@@ -89,12 +89,18 @@ namespace FileTracker.ViewModels
 
         public void AddFolder(string parameter)
         {
-            if (!Directory.Exists(parameter))
+            try
+            {
+                Model.AddFolder(parameter);
+            }
+            catch (DirectoryNotFoundException)
             {
                 Messenger.Raise(new InformationMessage("指定のフォルダは見つかりませんでした。", "エラー", System.Windows.MessageBoxImage.Exclamation, "InformationMessage"));
-                return;
             }
-            Model.AddFolder(parameter);
+            catch (ArgumentException)
+            {
+                Messenger.Raise(new InformationMessage("指定のフォルダは既に登録されています。", "エラー", System.Windows.MessageBoxImage.Exclamation, "InformationMessage"));
+            }
         }
         #endregion
 

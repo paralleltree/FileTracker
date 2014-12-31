@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 using Livet;
 using Newtonsoft.Json;
@@ -52,6 +53,14 @@ namespace FileTracker.Models
 
         public void AddFolder(string path)
         {
+            path = Regex.Replace(path, @"\\{2,}\Z", "");
+
+            if (!Directory.Exists(path))
+                throw new DirectoryNotFoundException("存在しないフォルダです。");
+
+            if (TrackingFolders.Any(p => string.Equals(p.Path, path, StringComparison.OrdinalIgnoreCase)))
+                throw new ArgumentException("既に登録されたフォルダです。", "path");
+
             TrackingFolders.Add(new FolderItem(path));
         }
 
