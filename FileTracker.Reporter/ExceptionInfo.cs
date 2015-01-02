@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace FileTracker.Reporter
 {
@@ -17,6 +18,27 @@ namespace FileTracker.Reporter
         /// 例外発生時の実行情報を格納します。
         /// </summary>
         public RunningInfo RunningInfo { get; set; }
+
+
+        /// <summary>
+        /// ExceptionInfoのインスタンスをファイルに保存します。
+        /// </summary>
+        /// <param name="info">保存するExceptionInfoインスタンス</param>
+        /// <param name="path">保存先</param>
+        public static void WriteInfo(ExceptionInfo info, string path)
+        {
+            File.WriteAllText(path, JsonConvert.SerializeObject(info, Formatting.Indented));
+        }
+
+        /// <summary>
+        /// 指定のファイルからExceptionInfoのインスタンスを生成します。
+        /// </summary>
+        /// <param name="path">読み込み先</param>
+        /// <returns>生成されたExceptionInfoインスタンス</returns>
+        public static ExceptionInfo ReadInfo(string path)
+        {
+            return JsonConvert.DeserializeObject<ExceptionInfo>(File.ReadAllText(path));
+        }
     }
 
     public class EnvironmentInfo
