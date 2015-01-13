@@ -10,6 +10,8 @@ using Newtonsoft.Json;
 
 namespace FileTracker.Models
 {
+    public delegate void TransmissionMessageEventHandler(object sender, TransmissionMessageEventArgs e);
+
     public sealed class Model : NotificationObject, IDisposable
     {
         private static Model _model;
@@ -27,6 +29,8 @@ namespace FileTracker.Models
          */
 
         private readonly string TargetsPath = "targets.json";
+
+        public event TransmissionMessageEventHandler MessageRaised;
 
         public DispatcherCollection<FolderItem> TrackingFolders { get; private set; }
 
@@ -56,10 +60,16 @@ namespace FileTracker.Models
             path = Regex.Replace(path, @"\\{2,}\Z", "");
 
             if (!Directory.Exists(path))
-                throw new DirectoryNotFoundException("存在しないフォルダです。");
+            {
+                RaiseMessageRaised(new TransmissionMessageEventArgs("指定のフォルダは見つかりませんでした。"));
+                return;
+            }
 
             if (TrackingFolders.Any(p => string.Equals(p.Path, path, StringComparison.OrdinalIgnoreCase)))
-                throw new ArgumentException("既に登録されたフォルダです。", "path");
+            {
+                RaiseMessageRaised(new TransmissionMessageEventArgs("既に登録されたフォルダです。"));
+                return;
+            }
 
             TrackingFolders.Add(new FolderItem(path));
         }
@@ -69,6 +79,12 @@ namespace FileTracker.Models
             TrackingFolders.Remove(item);
         }
 
+
+        private void RaiseMessageRaised(TransmissionMessageEventArgs e)
+        {
+            if (MessageRaised != null)
+                MessageRaised(this, e);
+        }
 
         public void Dispose()
         {
