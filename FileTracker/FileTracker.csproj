@@ -87,6 +87,7 @@
     <Compile Include="Models\FileItem.cs" />
     <Compile Include="Models\FolderItem.cs" />
     <Compile Include="Models\Model.cs" />
+    <Compile Include="Models\TransmissionMessageEventArgs.cs" />
     <Compile Include="ViewModels\FileItemViewModel.cs" />
     <Compile Include="ViewModels\FolderItemViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
