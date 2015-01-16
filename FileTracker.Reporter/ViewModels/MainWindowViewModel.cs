@@ -59,8 +59,41 @@ namespace FileTracker.Reporter.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
+        private Model Model { get; set; }
+
+        public bool IsInfoGiven
+        {
+            get
+            {
+                if (Model == null) return false;
+                return Model.IsInfoGiven;
+            }
+        }
+
+        public string InfoPath
+        {
+            get
+            {
+                if (Model == null) return "";
+                return Model.InfoPath;
+            }
+        }
+
+        public ExceptionInfo Info
+        {
+            get
+            {
+                if (Model == null) return null;
+                return Model.ExceptionInfo;
+            }
+        }
+
+
         public void Initialize()
         {
+            Model = Model.Instance;
+            RaisePropertyChanged("IsInfoGiven");
+            RaisePropertyChanged("Info");
         }
     }
 }

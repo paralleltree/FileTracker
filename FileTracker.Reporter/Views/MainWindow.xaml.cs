@@ -25,7 +25,7 @@ namespace FileTracker.Reporter.Views
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : NavigationWindow
     {
         public MainWindow()
         {

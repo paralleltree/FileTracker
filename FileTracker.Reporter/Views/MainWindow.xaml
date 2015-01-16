@@ -1,4 +1,4 @@
-﻿<Window x:Class="FileTracker.Reporter.Views.MainWindow"
+﻿<NavigationWindow x:Class="FileTracker.Reporter.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
@@ -6,11 +6,19 @@
         xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
         xmlns:v="clr-namespace:FileTracker.Reporter.Views"
         xmlns:vm="clr-namespace:FileTracker.Reporter.ViewModels"
-        Title="MainWindow" Height="350" Width="525">
+        Title="FileTracker Exception Reporter"
+        Height="270" Width="540"
+        Source="StartPage.xaml" ShowsNavigationUI="False">
 
     <Window.DataContext>
         <vm:MainWindowViewModel/>
     </Window.DataContext>
+
+    <Window.Resources>
+        <!--<Style TargetType="StackPanel">
+            <Setter Property="Background" Value="Gainsboro"/>
+        </Style>-->
+    </Window.Resources>
 
     <i:Interaction.Triggers>
 
@@ -31,8 +39,4 @@
         <!--WindowのCloseキャンセル処理に対応する場合は、WindowCloseCancelBehaviorの使用を検討してください-->
 
     </i:Interaction.Triggers>
-
-    <Grid>
-
-    </Grid>
-</Window>
+</NavigationWindow>
