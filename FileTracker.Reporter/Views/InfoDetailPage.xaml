@@ -80,25 +80,33 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Text="ソフトウェア名">
+                <TextBlock Text="記録日時"/>
+                <TextBox IsReadOnly="True" Text="{Binding Timestamp}"/>
+
+                <TextBlock Grid.Row="1" Text="実行時PID"/>
+                <TextBox Grid.Row="1" IsReadOnly="True" Text="{Binding ProcessId}"/>
+
+                <TextBlock Grid.Row="2" Text="ソフトウェア名">
                     <TextBlock.ToolTip>
                         エラー時に利用していたソフトウェア名を入力してください。
                         (例: メモ帳)
                     </TextBlock.ToolTip>
                 </TextBlock>
-                <TextBox Grid.Column="1" Text="{Binding SoftwareName}"/>
+                <TextBox Grid.Row="2" Text="{Binding SoftwareName}"/>
 
-                <TextBlock Grid.Row="1" Text="編集ファイル">
+                <TextBlock Grid.Row="3" Text="編集ファイル">
                     <TextBlock.ToolTip>
                         エラー時に編集していたファイルパスを取得します。
                     </TextBlock.ToolTip>
                 </TextBlock>
-                <Button Grid.Row="1" Grid.Column="1" Margin="1" Content="参照">
+                <Button Grid.Row="3" Grid.Column="1" Margin="1" Content="参照">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="Click">
                             <l:OpenFileDialogInteractionMessageAction>
@@ -110,17 +118,17 @@
                     </i:Interaction.Triggers>
                 </Button>
 
-                <TextBlock Grid.Row="2" Margin="4" Text="コメント" VerticalAlignment="Top">
+                <TextBlock Grid.Row="4" Text="コメント" VerticalAlignment="Top">
                     <TextBlock.ToolTip>
                         エラー時の状況を入力してください。
                         (例: メモ帳で保存したら動作が停止した。)
                     </TextBlock.ToolTip>
                 </TextBlock>
-                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding UserComment}" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible"/>
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding UserComment}" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible"/>
 
-                <GridSplitter Grid.Row="3" Grid.ColumnSpan="2" Margin="1" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                <GridSplitter Grid.Row="5" Grid.ColumnSpan="2" Margin="1" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
 
-                <Expander Grid.Row="4" Grid.ColumnSpan="2" Margin="2" Header="例外オブジェクト" Background="#FFFFAAAA" DataContext="{Binding Exception}">
+                <Expander Grid.Row="6" Grid.ColumnSpan="2" Margin="2" Header="例外オブジェクト" Background="#FFFFAAAA" DataContext="{Binding Exception}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>

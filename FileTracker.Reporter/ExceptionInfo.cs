@@ -77,6 +77,16 @@ namespace FileTracker.Reporter
     public class RunningInfo
     {
         /// <summary>
+        /// 例外の記録日時を格納します。
+        /// </summary>
+        public DateTime Timestamp { get; set; }
+
+        /// <summary>
+        /// 実行時のプロセスIDを格納します。
+        /// </summary>
+        public int ProcessId { get; set; }
+
+        /// <summary>
         /// 例外オブジェクトを格納します。
         /// </summary>
         public Exception Exception { get; set; }
