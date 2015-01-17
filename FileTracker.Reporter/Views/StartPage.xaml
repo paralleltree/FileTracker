@@ -14,7 +14,7 @@
         <StackPanel>
             <TextBlock Text="FileTrackerの例外レポーターです。エラー発生時に自動起動されます。"/>
             <TextBlock TextWrapping="Wrap" Visibility="{Binding IsInfoGiven, Converter={StaticResource BooleanToVisibilityConverter}}">
-            バグ修正のために、例外が発生した状況を記録していただきますようお願いします。
+                バグ修正のために、例外が発生した状況を記録していただきますようお願いします。
             </TextBlock>
 
             <TextBlock>
@@ -32,7 +32,7 @@
             </TextBlock>
         </StackPanel>
 
-        <Label HorizontalAlignment="Right" VerticalAlignment="Bottom">
+        <Label HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="{Binding IsInfoGiven, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Hyperlink Command="" NavigateUri="InfoDetailPage.xaml">
                 <Run Text="詳細を閲覧編集する"/>
             </Hyperlink>

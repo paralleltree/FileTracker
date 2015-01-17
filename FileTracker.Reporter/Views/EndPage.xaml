@@ -4,18 +4,21 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       mc:Ignorable="d" Title="編集完了"
-      d:DesignHeight="140" d:DesignWidth="340">
+      d:DesignHeight="140" d:DesignWidth="420">
 
     <Grid Margin="2">
         <StackPanel>
             <TextBlock TextWrapping="Wrap">
-            例外情報を更新しました。添付ファイルとして、
-            <Hyperlink NavigateUri="mailto:paralleltree@outlook.com">
-                <Run Text="paralleltree@outlook.com"/>
-            </Hyperlink>
-            までお送りください。
-
+                例外情報を更新しました。<LineBreak/>
+                添付ファイルとして、
+                <Hyperlink NavigateUri="mailto:paralleltree@outlook.com">
+                    <Run Text="paralleltree@outlook.com"/>
+                </Hyperlink>
+                までお送りください。<LineBreak/>
+                件名は [FileTrackerエラー報告] など適当で構いません。<LineBreak/>
+                また、送信後は削除して問題ありません。
             </TextBlock>
+
             <TextBlock Text="例外情報ファイルの出力先:"/>
             <TextBlock TextWrapping="Wrap">
                 <Hyperlink Command="{Binding LaunchExplorerCommand}" CommandParameter="{Binding InfoPath}">

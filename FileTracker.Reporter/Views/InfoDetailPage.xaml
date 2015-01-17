@@ -85,7 +85,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Margin="4" VerticalAlignment="Center" Text="ソフトウェア名">
+                <TextBlock Text="ソフトウェア名">
                     <TextBlock.ToolTip>
                         エラー時に利用していたソフトウェア名を入力してください。
                         (例: メモ帳)
