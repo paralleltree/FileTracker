@@ -54,8 +54,7 @@ namespace FileTracker.Models
                         Hash = p.Match.Groups["hash"].Value,
                         Date = DateTime.ParseExact(p.Match.Groups["date"].Value, Common.DateFormat, null),
                         Path = p.Path
-                    })
-                    .ToList();
+                    });
 
                 // 同一ファイルごとに辞書に追加
                 var dic = new Dictionary<string, Dictionary<DateTime, FileInfo>>();
