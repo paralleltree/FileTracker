@@ -15,7 +15,7 @@ namespace FileTracker.Reporter.Models
             if (args.Length > 1)
             {
                 IsInfoGiven = true;
-                InfoPath = args[1];
+                InfoPath = System.IO.Path.GetFullPath(args[1]);
                 ExceptionInfo = ExceptionInfo.ReadInfo(args[1]);
             }
         }
@@ -48,5 +48,11 @@ namespace FileTracker.Reporter.Models
         /// 渡された例外情報を格納します。
         /// </summary>
         public ExceptionInfo ExceptionInfo { get; private set; }
+
+
+        public void SaveInfo()
+        {
+            ExceptionInfo.WriteInfo(ExceptionInfo, InfoPath);
+        }
     }
 }

@@ -3,7 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      mc:Ignorable="d"
+      mc:Ignorable="d" Title="編集完了"
       d:DesignHeight="140" d:DesignWidth="340">
 
     <Grid Margin="2">
@@ -17,8 +17,10 @@
 
             </TextBlock>
             <TextBlock Text="例外情報ファイルの出力先:"/>
-            <TextBlock>
-                exception.json
+            <TextBlock TextWrapping="Wrap">
+                <Hyperlink Command="{Binding LaunchExplorerCommand}" CommandParameter="{Binding InfoPath}">
+                    <Run Text="{Binding InfoPath, Mode=OneWay}"/>
+                </Hyperlink>
             </TextBlock>
         </StackPanel>
     </Grid>

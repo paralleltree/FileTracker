@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.ComponentModel;
+using System.Diagnostics;
 
 using Livet;
 using Livet.Commands;
@@ -95,5 +96,96 @@ namespace FileTracker.Reporter.ViewModels
             RaisePropertyChanged("IsInfoGiven");
             RaisePropertyChanged("Info");
         }
+
+
+        #region SaveInfoCommand
+        private ViewModelCommand _SaveInfoCommand;
+
+        public ViewModelCommand SaveInfoCommand
+        {
+            get
+            {
+                if (_SaveInfoCommand == null)
+                {
+                    _SaveInfoCommand = new ViewModelCommand(SaveInfo, CanSaveInfo);
+                }
+                return _SaveInfoCommand;
+            }
+        }
+
+        public bool CanSaveInfo()
+        {
+            return IsInfoGiven;
+        }
+
+        public void SaveInfo()
+        {
+            Model.SaveInfo();
+        }
+        #endregion
+
+        #region SelectFileCommand
+        private ListenerCommand<OpeningFileSelectionMessage> _SelectFileCommand;
+
+        public ListenerCommand<OpeningFileSelectionMessage> SelectFileCommand
+        {
+            get
+            {
+                if (_SelectFileCommand == null)
+                {
+                    _SelectFileCommand = new ListenerCommand<OpeningFileSelectionMessage>(SelectFile);
+                }
+                return _SelectFileCommand;
+            }
+        }
+
+        public void SelectFile(OpeningFileSelectionMessage parameter)
+        {
+            if (parameter.Response == null) return;
+            Model.ExceptionInfo.RunningInfo.FilePath = parameter.Response;
+        }
+        #endregion
+
+        #region LaunchExplorerCommand
+        private ListenerCommand<string> _LaunchExplorerCommand;
+
+        public ListenerCommand<string> LaunchExplorerCommand
+        {
+            get
+            {
+                if (_LaunchExplorerCommand == null)
+                {
+                    _LaunchExplorerCommand = new ListenerCommand<string>(LaunchExplorer);
+                }
+                return _LaunchExplorerCommand;
+            }
+        }
+
+        public void LaunchExplorer(string parameter)
+        {
+            Process.Start("explorer", @"/select," + parameter);
+        }
+        #endregion
+
+        #region OpenUrlCommand
+        private ListenerCommand<string> _OpenUrlCommand;
+
+        public ListenerCommand<string> OpenUrlCommand
+        {
+            get
+            {
+                if (_OpenUrlCommand == null)
+                {
+                    _OpenUrlCommand = new ListenerCommand<string>(OpenUrl);
+                }
+                return _OpenUrlCommand;
+            }
+        }
+
+        public void OpenUrl(string parameter)
+        {
+            Process.Start(parameter);
+        }
+        #endregion
     }
 }

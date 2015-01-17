@@ -3,29 +3,30 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      mc:Ignorable="d"
+      mc:Ignorable="d" Title="レポーター概要"
       d:DesignHeight="160" d:DesignWidth="500">
+
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Page.Resources>
 
     <Grid Margin="2">
         <StackPanel>
-            <TextBlock Text="FileTrackerの例外レポーターです。"/>
-            <TextBlock TextWrapping="Wrap">
+            <TextBlock Text="FileTrackerの例外レポーターです。エラー発生時に自動起動されます。"/>
+            <TextBlock TextWrapping="Wrap" Visibility="{Binding IsInfoGiven, Converter={StaticResource BooleanToVisibilityConverter}}">
             バグ修正のために、例外が発生した状況を記録していただきますようお願いします。
-            </TextBlock>
-            <TextBlock>
-                エラー発生時に自動起動されます。
             </TextBlock>
 
             <TextBlock>
                 -
-                <Hyperlink NavigateUri="https://github.com/paralleltree/FileTracker">
+                <Hyperlink Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/paralleltree/FileTracker">
                     <Run Text="プロジェクトページ"/>
                 </Hyperlink>
             </TextBlock>
 
             <TextBlock>
                 -
-                <Hyperlink NavigateUri="https://github.com/paralleltree/FileTracker/wiki/Q&amp;A">
+                <Hyperlink Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/paralleltree/FileTracker/wiki/Q&amp;A">
                     <Run Text="Q&amp;A"/>
                 </Hyperlink>
             </TextBlock>
@@ -33,7 +34,7 @@
 
         <Label HorizontalAlignment="Right" VerticalAlignment="Bottom">
             <Hyperlink Command="" NavigateUri="InfoDetailPage.xaml">
-                <Run Text="例外の詳細を見る"/>
+                <Run Text="詳細を閲覧編集する"/>
             </Hyperlink>
         </Label>
     </Grid>

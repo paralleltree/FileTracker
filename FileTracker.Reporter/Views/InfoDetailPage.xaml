@@ -3,8 +3,10 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+      xmlns:l="http://schemas.livet-mvvm.net/2011/wpf"
       xmlns:conv="clr-namespace:FileTracker.Reporter.Converters"
-      mc:Ignorable="d"
+      mc:Ignorable="d" Title="エラー詳細"
       d:DesignHeight="270" d:DesignWidth="480">
 
     <Grid DataContext="{Binding Info}" Background="Transparent">
@@ -51,22 +53,22 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Text="OSVersion"/>
-                <TextBox Grid.Row="0" IsReadOnly="True"/>
+                <TextBox Grid.Row="0" IsReadOnly="True" Text="{Binding OSVersion, Mode=OneWay}"/>
 
                 <TextBlock Grid.Row="1" Text="ImageRuntimeVersion"/>
-                <TextBox Grid.Row="1" IsReadOnly="True"/>
+                <TextBox Grid.Row="1" IsReadOnly="True" Text="{Binding ImageRuntimeVersion, Mode=OneWay}"/>
 
                 <TextBlock Grid.Row="2" Text="RuntimeVersion"/>
-                <TextBox Grid.Row="2" IsReadOnly="True"/>
+                <TextBox Grid.Row="2" IsReadOnly="True" Text="{Binding RuntimeVersion, Mode=OneWay}"/>
 
                 <TextBlock Grid.Row="3" Text="AssemblyVersion"/>
-                <TextBox Grid.Row="3" IsReadOnly="True"/>
+                <TextBox Grid.Row="3" IsReadOnly="True" Text="{Binding AssemblyVersion, Mode=OneWay}"/>
 
                 <TextBlock Grid.Row="4" Text="Is64BitProcess"/>
-                <TextBox Grid.Row="4" IsReadOnly="True"/>
+                <TextBox Grid.Row="4" IsReadOnly="True" Text="{Binding Is64BitProcess, Mode=OneWay}"/>
 
                 <TextBlock Grid.Row="5" Text="ExecutionPath"/>
-                <TextBox Grid.Row="5" IsReadOnly="True"/>
+                <TextBox Grid.Row="5" IsReadOnly="True" Text="{Binding ExecutionPath, Mode=OneWay}"/>
             </Grid>
         </Expander>
         <Expander Grid.Row="1" Margin="1" Header="実行情報" Background="#FFFFBF7F" IsExpanded="True" DataContext="{Binding RunningInfo}">
@@ -83,22 +85,38 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Margin="4" VerticalAlignment="Center" Text="ソフトウェア名"/>
-                <TextBox Grid.Column="1"/>
+                <TextBlock Margin="4" VerticalAlignment="Center" Text="ソフトウェア名">
+                    <TextBlock.ToolTip>
+                        エラー時に利用していたソフトウェア名を入力してください。
+                        (例: メモ帳)
+                    </TextBlock.ToolTip>
+                </TextBlock>
+                <TextBox Grid.Column="1" Text="{Binding SoftwareName}"/>
 
-                <TextBlock Grid.Row="1" Text="編集ファイル"/>
-                <Grid Grid.Row="1" Grid.Column="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="1" Text="編集ファイル">
+                    <TextBlock.ToolTip>
+                        エラー時に編集していたファイルパスを取得します。
+                    </TextBlock.ToolTip>
+                </TextBlock>
+                <Button Grid.Row="1" Grid.Column="1" Margin="1" Content="参照">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="Click">
+                            <l:OpenFileDialogInteractionMessageAction>
+                                <l:DirectInteractionMessage CallbackCommand="{Binding DataContext.SelectFileCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Page}}">
+                                    <l:OpeningFileSelectionMessage Title="編集ファイルパス取得" MultiSelect="True"/>
+                                </l:DirectInteractionMessage>
+                            </l:OpenFileDialogInteractionMessageAction>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </Button>
 
-                    <TextBox Grid.Column="0"/>
-                    <Button Grid.Column="1" Margin="1" Content="参照"/>
-                </Grid>
-
-                <TextBlock Grid.Row="2" Margin="4" Text="コメント" VerticalAlignment="Top"/>
-                <TextBox Grid.Row="2" Grid.Column="1" VerticalScrollBarVisibility="Visible"/>
+                <TextBlock Grid.Row="2" Margin="4" Text="コメント" VerticalAlignment="Top">
+                    <TextBlock.ToolTip>
+                        エラー時の状況を入力してください。
+                        (例: メモ帳で保存したら動作が停止した。)
+                    </TextBlock.ToolTip>
+                </TextBlock>
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding UserComment}" TextWrapping="Wrap" VerticalScrollBarVisibility="Visible"/>
 
                 <GridSplitter Grid.Row="3" Grid.ColumnSpan="2" Margin="1" Height="3" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
 
@@ -116,23 +134,23 @@
                         </Grid.RowDefinitions>
 
                         <TextBlock Grid.Row="0" Text="Type"/>
-                        <TextBox Grid.Row="0" IsReadOnly="True"/>
+                        <TextBox Grid.Row="0" IsReadOnly="True" Text="{Binding Mode=OneWay, Converter={StaticResource TypeNameConverter}}"/>
 
                         <TextBlock Grid.Row="1" Text="Message"/>
-                        <TextBox Grid.Row="1" IsReadOnly="True"/>
+                        <TextBox Grid.Row="1" IsReadOnly="True" Text="{Binding Message, Mode=OneWay}"/>
 
                         <TextBlock Grid.Row="2" Text="Source"/>
-                        <TextBox Grid.Row="2" IsReadOnly="True"/>
+                        <TextBox Grid.Row="2" IsReadOnly="True" Text="{Binding Source,Mode=OneWay}"/>
 
                         <TextBlock Grid.Row="3" Text="StackTrace" VerticalAlignment="Top"/>
-                        <TextBox Grid.Row="3" IsReadOnly="True"/>
+                        <TextBox Grid.Row="3" IsReadOnly="True" Text="{Binding StackTrace, Mode=OneWay}"/>
                     </Grid>
                 </Expander>
             </Grid>
         </Expander>
         <TextBlock Grid.Row="2" Text="背景が白のフィールドへ自由に記述できます。" HorizontalAlignment="Left"/>
         <TextBlock Grid.Row="2">
-            <Hyperlink NavigateUri="EndPage.xaml">
+            <Hyperlink NavigateUri="EndPage.xaml" Command="{Binding DataContext.SaveInfoCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Page}}">
                 <Run Text="編集を終える"/>
             </Hyperlink>
         </TextBlock>
