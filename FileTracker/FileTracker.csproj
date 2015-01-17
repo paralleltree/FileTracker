@@ -130,7 +130,12 @@
     <Content Include="InfrastructureAssemblies\System.Windows.Interactivity.dll" />
     <Resource Include="Resources\MainIcon.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\FileTracker.Reporter\FileTracker.Reporter.csproj">
+      <Project>{8f4521a1-b3f8-4232-b5a2-a482dafeb8cd}</Project>
+      <Name>FileTracker.Reporter</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
