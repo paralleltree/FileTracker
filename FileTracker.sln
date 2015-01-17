@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileTracker", "FileTracker\FileTracker.csproj", "{BB5EFF86-6440-4FFA-8CEE-FB3A52F42E29}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileTracker.Reporter", "FileTracker.Reporter\FileTracker.Reporter.csproj", "{8F4521A1-B3F8-4232-B5A2-A482DAFEB8CD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -15,6 +17,10 @@ Global
 		{BB5EFF86-6440-4FFA-8CEE-FB3A52F42E29}.Debug|x86.Build.0 = Debug|x86
 		{BB5EFF86-6440-4FFA-8CEE-FB3A52F42E29}.Release|x86.ActiveCfg = Release|x86
 		{BB5EFF86-6440-4FFA-8CEE-FB3A52F42E29}.Release|x86.Build.0 = Release|x86
+		{8F4521A1-B3F8-4232-B5A2-A482DAFEB8CD}.Debug|x86.ActiveCfg = Debug|x86
+		{8F4521A1-B3F8-4232-B5A2-A482DAFEB8CD}.Debug|x86.Build.0 = Debug|x86
+		{8F4521A1-B3F8-4232-B5A2-A482DAFEB8CD}.Release|x86.ActiveCfg = Release|x86
+		{8F4521A1-B3F8-4232-B5A2-A482DAFEB8CD}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
