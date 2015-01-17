@@ -8,6 +8,7 @@
                   xmlns:vm="clr-namespace:FileTracker.Reporter.ViewModels"
                   Title="FileTracker Exception Reporter"
                   Height="300" Width="600"
+                  Icon="../Resources/MainIcon.ico"
                   Source="StartPage.xaml" ShowsNavigationUI="False">
 
     <Window.DataContext>
