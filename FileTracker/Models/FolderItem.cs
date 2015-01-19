@@ -76,11 +76,7 @@ namespace FileTracker.Models
                 }
             }
 
-            Watcher = new FileSystemWatcher(path)
-            {
-                EnableRaisingEvents = true,
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
-            };
+            Watcher = CreateWatcher(path);
             Watcher.Changed += OnChanged;
             Watcher.Deleted += OnDeleted;
             Watcher.Renamed += OnRenamed;
@@ -128,11 +124,7 @@ namespace FileTracker.Models
 
             string path = Watcher.Path;
             Dispose();
-            Watcher = new FileSystemWatcher(path)
-            {
-                EnableRaisingEvents = true,
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
-            };
+            Watcher = CreateWatcher(path);
         }
 
 
@@ -146,6 +138,15 @@ namespace FileTracker.Models
                 Watcher.Error -= OnError;
                 Watcher.Dispose();
             }
+        }
+
+        private static FileSystemWatcher CreateWatcher(string path)
+        {
+            return new FileSystemWatcher(path)
+            {
+                EnableRaisingEvents = true,
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
+            };
         }
     }
 }
