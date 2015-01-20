@@ -72,12 +72,16 @@ namespace FileTracker.Models
                 return;
             }
 
-            _trackingFolders.Add(new FolderItem(path));
+            var item = new FolderItem(path);
+            item.WatcherDisabled += OnWatcherDisabled;
+            _trackingFolders.Add(item);
         }
 
         public void RemoveFolder(FolderItem item)
         {
+            item.WatcherDisabled -= OnWatcherDisabled;
             _trackingFolders.Remove(item);
+            item.Dispose();
         }
 
 
@@ -85,6 +89,11 @@ namespace FileTracker.Models
         {
             if (MessageRaised != null)
                 MessageRaised(this, e);
+        }
+
+        private void OnWatcherDisabled(object sender, ErrorEventArgs e)
+        {
+            RemoveFolder((FolderItem)sender);
         }
 
         public void Dispose()

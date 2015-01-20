@@ -11,6 +11,9 @@ namespace FileTracker.Models
 {
     public sealed class FolderItem : NotificationObject, IDisposable
     {
+        public event EventHandler<ErrorEventArgs> WatcherDisabled;
+
+
         private FileSystemWatcher Watcher { get; set; }
 
         public string Path
@@ -124,7 +127,15 @@ namespace FileTracker.Models
 
             string path = Watcher.Path;
             Dispose();
-            Watcher = CreateWatcher(path);
+            try
+            {
+                Watcher = CreateWatcher(path);
+            }
+            catch (Exception)
+            {
+                if (WatcherDisabled != null)
+                    WatcherDisabled(this, e);
+            }
         }
 
 
