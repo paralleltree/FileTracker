@@ -10,8 +10,6 @@ using Newtonsoft.Json;
 
 namespace FileTracker.Models
 {
-    public delegate void TransmissionMessageEventHandler(object sender, TransmissionMessageEventArgs e);
-
     public sealed class Model : NotificationObject, IDisposable
     {
         private static Model _model;
@@ -30,7 +28,7 @@ namespace FileTracker.Models
 
         private readonly string TargetsPath = "targets.json";
 
-        public event TransmissionMessageEventHandler MessageRaised;
+        public event EventHandler<TransmissionMessageEventArgs> MessageRaised;
 
         public DispatcherCollection<FolderItem> TrackingFolders { get; private set; }
 
