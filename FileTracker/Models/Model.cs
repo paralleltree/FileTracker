@@ -30,12 +30,15 @@ namespace FileTracker.Models
 
         public event EventHandler<TransmissionMessageEventArgs> MessageRaised;
 
-        public DispatcherCollection<FolderItem> TrackingFolders { get; private set; }
+        private DispatcherCollection<FolderItem> _trackingFolders { get; set; }
+        public ReadOnlyDispatcherCollection<FolderItem> TrackingFolders { get; private set; }
 
 
         private Model()
         {
-            TrackingFolders = new DispatcherCollection<FolderItem>(DispatcherHelper.UIDispatcher);
+            _trackingFolders = new DispatcherCollection<FolderItem>(DispatcherHelper.UIDispatcher);
+            TrackingFolders = new ReadOnlyDispatcherCollection<FolderItem>(_trackingFolders);
+
             Initialize();
         }
 
@@ -47,7 +50,7 @@ namespace FileTracker.Models
                 foreach (string path in paths)
                 {
                     if (Directory.Exists(path))
-                        TrackingFolders.Add(new FolderItem(path));
+                        _trackingFolders.Add(new FolderItem(path));
                 }
             }
         }
@@ -69,12 +72,12 @@ namespace FileTracker.Models
                 return;
             }
 
-            TrackingFolders.Add(new FolderItem(path));
+            _trackingFolders.Add(new FolderItem(path));
         }
 
         public void RemoveFolder(FolderItem item)
         {
-            TrackingFolders.Remove(item);
+            _trackingFolders.Remove(item);
         }
 
 
