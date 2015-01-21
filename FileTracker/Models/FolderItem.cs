@@ -11,6 +11,9 @@ namespace FileTracker.Models
 {
     public sealed class FolderItem : NotificationObject, IDisposable
     {
+        public event EventHandler<ErrorEventArgs> WatcherDisabled;
+
+
         private FileSystemWatcher Watcher { get; set; }
 
         public string Path
@@ -76,11 +79,7 @@ namespace FileTracker.Models
                 }
             }
 
-            Watcher = new FileSystemWatcher(path)
-            {
-                EnableRaisingEvents = true,
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
-            };
+            Watcher = CreateWatcher(path);
             Watcher.Changed += OnChanged;
             Watcher.Deleted += OnDeleted;
             Watcher.Renamed += OnRenamed;
@@ -128,11 +127,15 @@ namespace FileTracker.Models
 
             string path = Watcher.Path;
             Dispose();
-            Watcher = new FileSystemWatcher(path)
+            try
             {
-                EnableRaisingEvents = true,
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
-            };
+                Watcher = CreateWatcher(path);
+            }
+            catch (Exception)
+            {
+                if (WatcherDisabled != null)
+                    WatcherDisabled(this, e);
+            }
         }
 
 
@@ -146,6 +149,15 @@ namespace FileTracker.Models
                 Watcher.Error -= OnError;
                 Watcher.Dispose();
             }
+        }
+
+        private static FileSystemWatcher CreateWatcher(string path)
+        {
+            return new FileSystemWatcher(path)
+            {
+                EnableRaisingEvents = true,
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
+            };
         }
     }
 }

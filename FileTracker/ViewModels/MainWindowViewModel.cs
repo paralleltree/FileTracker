@@ -60,8 +60,6 @@ namespace FileTracker.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
-        private EventListener<TransmissionMessageEventHandler> Listener { get; set; }
-
         private Model Model { get; set; }
 
         public ReadOnlyDispatcherCollection<FolderItemViewModel> TrackingFolders { get; private set; }
@@ -72,7 +70,7 @@ namespace FileTracker.ViewModels
             TrackingFolders = ViewModelHelper.CreateReadOnlyDispatcherCollection(Model.TrackingFolders, p => new FolderItemViewModel(p), DispatcherHelper.UIDispatcher);
             RaisePropertyChanged("TrackingFolders");
 
-            Listener = new EventListener<TransmissionMessageEventHandler>(
+            var listener = new EventListener<EventHandler<TransmissionMessageEventArgs>>(
                 h => Model.MessageRaised += h,
                 h => Model.MessageRaised -= h,
                 (sender, e) =>
@@ -80,7 +78,7 @@ namespace FileTracker.ViewModels
                     Messenger.Raise(new InformationMessage(e.Message, "FileTracker", "InformationMessage"));
                     e.Handled = true;
                 });
-            CompositeDisposable.Add(Listener);
+            CompositeDisposable.Add(listener);
         }
 
 

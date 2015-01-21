@@ -10,8 +10,6 @@ using Newtonsoft.Json;
 
 namespace FileTracker.Models
 {
-    public delegate void TransmissionMessageEventHandler(object sender, TransmissionMessageEventArgs e);
-
     public sealed class Model : NotificationObject, IDisposable
     {
         private static Model _model;
@@ -30,14 +28,17 @@ namespace FileTracker.Models
 
         private readonly string TargetsPath = "targets.json";
 
-        public event TransmissionMessageEventHandler MessageRaised;
+        public event EventHandler<TransmissionMessageEventArgs> MessageRaised;
 
-        public DispatcherCollection<FolderItem> TrackingFolders { get; private set; }
+        private DispatcherCollection<FolderItem> _trackingFolders { get; set; }
+        public ReadOnlyDispatcherCollection<FolderItem> TrackingFolders { get; private set; }
 
 
         private Model()
         {
-            TrackingFolders = new DispatcherCollection<FolderItem>(DispatcherHelper.UIDispatcher);
+            _trackingFolders = new DispatcherCollection<FolderItem>(DispatcherHelper.UIDispatcher);
+            TrackingFolders = new ReadOnlyDispatcherCollection<FolderItem>(_trackingFolders);
+
             Initialize();
         }
 
@@ -49,7 +50,7 @@ namespace FileTracker.Models
                 foreach (string path in paths)
                 {
                     if (Directory.Exists(path))
-                        TrackingFolders.Add(new FolderItem(path));
+                        _trackingFolders.Add(new FolderItem(path));
                 }
             }
         }
@@ -71,12 +72,16 @@ namespace FileTracker.Models
                 return;
             }
 
-            TrackingFolders.Add(new FolderItem(path));
+            var item = new FolderItem(path);
+            item.WatcherDisabled += OnWatcherDisabled;
+            _trackingFolders.Add(item);
         }
 
         public void RemoveFolder(FolderItem item)
         {
-            TrackingFolders.Remove(item);
+            item.WatcherDisabled -= OnWatcherDisabled;
+            _trackingFolders.Remove(item);
+            item.Dispose();
         }
 
 
@@ -84,6 +89,11 @@ namespace FileTracker.Models
         {
             if (MessageRaised != null)
                 MessageRaised(this, e);
+        }
+
+        private void OnWatcherDisabled(object sender, ErrorEventArgs e)
+        {
+            RemoveFolder((FolderItem)sender);
         }
 
         public void Dispose()
