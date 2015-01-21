@@ -87,8 +87,12 @@ namespace FileTracker.Models
             FileChangedListener = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
                 h => Watcher.Changed += h,
                 h => Watcher.Changed -= h)
-                .Throttle(TimeSpan.FromSeconds(1))
-                .Subscribe(p => OnChanged(p.Sender, p.EventArgs));
+                .GroupBy(p => p.EventArgs.Name)
+                .Subscribe(p =>
+                {
+                    p.Throttle(TimeSpan.FromSeconds(1))
+                        .Subscribe(q => OnChanged(q.Sender, q.EventArgs));
+                });
 
             //Watcher.Changed += OnChanged;
             Watcher.Deleted += OnDeleted;
