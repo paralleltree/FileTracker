@@ -24,5 +24,38 @@ namespace FileTracker.Views
         {
             InitializeComponent();
         }
+
+        #region Header Property
+        public string Header
+        {
+            get { return (string)GetValue(HeaderProperty); }
+            set { SetValue(HeaderProperty, value); }
+        }
+
+        public static readonly DependencyProperty HeaderProperty =
+            DependencyProperty.Register("Header", typeof(string), typeof(CollectionPane), new PropertyMetadata("Header"));
+        #endregion
+
+        #region Description Property
+        public string Description
+        {
+            get { return (string)GetValue(DescriptionProperty); }
+            set { SetValue(DescriptionProperty, value); }
+        }
+
+        public static readonly DependencyProperty DescriptionProperty =
+            DependencyProperty.Register("Description", typeof(string), typeof(CollectionPane), new PropertyMetadata(""));
+        #endregion
+
+        #region Count Property
+        public int Count
+        {
+            get { return (int)GetValue(CountProperty); }
+            set { SetValue(CountProperty, value); }
+        }
+
+        public static readonly DependencyProperty CountProperty =
+            DependencyProperty.Register("Count", typeof(int), typeof(CollectionPane), new PropertyMetadata(0));
+        #endregion
     }
 }
