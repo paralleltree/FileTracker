@@ -9,7 +9,8 @@
         xmlns:conv="clr-namespace:FileTracker.Views.Converters"
         Title="FileTracker"
         Icon="../Resources/MainIcon.ico"
-        Height="350" Width="780">
+        Background="Gray"
+        Height="350" Width="920">
 
     <Window.DataContext>
         <vm:MainWindowViewModel/>
@@ -17,8 +18,14 @@
 
     <Window.Resources>
         <conv:ByteSizeConverter x:Key="ByteSizeConverter"/>
+        <Style TargetType="ListView">
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
         <Style TargetType="GridViewColumnHeader">
             <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         </Style>
     </Window.Resources>
 
@@ -47,40 +54,46 @@
 
     <Grid Margin="1">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="5*"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="6*"/>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="4*"/>
         </Grid.ColumnDefinitions>
 
-        <Grid Margin="1">
+        <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="対象フォルダ"/>
-            <ListBox Grid.Row="1" Name="FolderList" ItemsSource="{Binding TrackingFolders}" IsSynchronizedWithCurrentItem="False">
-                <ListBox.Resources>
-                    <ContextMenu x:Key="cm">
-                        <MenuItem Header="削除" FontWeight="Bold"
-                                  Command="{Binding RemoveCommand}"/>
-                    </ContextMenu>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="ContextMenu" Value="{StaticResource cm}"/>
-                    </Style>
-                </ListBox.Resources>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <CheckBox Margin="2" IsChecked="{Binding IsWatching}" Focusable="False" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Path}"/>
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+            <v:CollectionPane x:Name="FolderList" Header="Folders" Count="{Binding TrackingFolders.Count}">
+                <ListView ItemsSource="{Binding TrackingFolders}" SelectionMode="Single">
+                    <ListView.Resources>
+                        <ContextMenu x:Key="cm">
+                            <MenuItem Header="解除" FontWeight="Bold"
+                                      Command="{Binding RemoveCommand}"/>
+                        </ContextMenu>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="ContextMenu" Value="{StaticResource cm}"/>
+                        </Style>
+                    </ListView.Resources>
+
+                    <ListView.View>
+                        <GridView AllowsColumnReorder="True">
+                            <GridViewColumn Header="追跡">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding IsWatching}" HorizontalAlignment="Center"/>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="パス" DisplayMemberBinding="{Binding Path}" Width="240"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </v:CollectionPane>
+
             <Grid Grid.Row="2" Margin="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -88,20 +101,17 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBox Margin="1" Name="PathText" Text="" />
-                <Button Grid.Column="1" Margin="1" Content="追加"
+                <Button Grid.Column="1" Margin="1" Content="登録"
                         Command="{Binding AddFolderCommand}"
                         CommandParameter="{Binding Text, ElementName=PathText}"/>
             </Grid>
         </Grid>
-        <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Center"/>
-        <Grid Grid.Column="2" Margin="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
 
-            <TextBlock Text="追跡ファイル"/>
-            <ListView Name="FileList" Grid.Row="1" ItemsSource="{Binding SelectedItem.TrackingFiles, ElementName=FolderList}" SelectionMode="Single">
+        <GridSplitter Grid.Column="1" Width="2" HorizontalAlignment="Center" Background="Transparent"/>
+        <v:CollectionPane DataContext="{Binding Path=Content.SelectedItem, ElementName=FolderList}"
+                          x:Name="FileList" Grid.Column="2" Header="Tracking"
+                          Count="{Binding TrackingFiles.Count}">
+            <ListView ItemsSource="{Binding TrackingFiles}" SelectionMode="Single">
                 <ListView.Resources>
                     <Style TargetType="ListViewItem">
                         <Setter Property="ContextMenu">
@@ -113,25 +123,24 @@
                             </Setter.Value>
                         </Setter>
                     </Style>
-
                 </ListView.Resources>
+
                 <ListView.View>
                     <GridView AllowsColumnReorder="True">
-                        <GridViewColumn Header="ファイル名" DisplayMemberBinding="{Binding Name}" Width="180"/>
-                        <GridViewColumn Header="最終書き込み" DisplayMemberBinding="{Binding LastWriteTime, StringFormat={}yyyy/MM/dd HH:mm:ss}" Width="144"/>
+                        <GridViewColumn Header="ファイル名" Width="180"
+                                        DisplayMemberBinding="{Binding Name}"/>
+                        <GridViewColumn Header="最終書き込み" Width="142"
+                                        DisplayMemberBinding="{Binding LastWriteTime, StringFormat='yyyy/MM/dd HH:mm:ss'}"/>
                     </GridView>
                 </ListView.View>
             </ListView>
-        </Grid>
-        <GridSplitter Grid.Column="3" Width="4" HorizontalAlignment="Center"/>
-        <Grid Grid.Column="4" Margin="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        </v:CollectionPane>
 
-            <TextBlock Text="スナップファイル"/>
-            <ListView Name="SnappedList" Grid.Row="1" DataContext="{Binding SelectedItem, ElementName=FileList}" ItemsSource="{Binding SnappedFiles}" SelectionMode="Single">
+        <GridSplitter Grid.Column="3" Width="2" HorizontalAlignment="Center" Background="Transparent"/>
+        <v:CollectionPane DataContext="{Binding Path=Content.SelectedItem, ElementName=FileList}"
+                          Grid.Column="4" x:Name="SnappedList" Header="Snapped"
+                          Count="{Binding SnappedFiles.Count}">
+            <ListView ItemsSource="{Binding SnappedFiles}" SelectionMode="Single">
                 <ListView.Resources>
                     <ContextMenu x:Key="cm">
                         <MenuItem Header="復元" FontWeight="Bold"
@@ -145,10 +154,12 @@
                         <Setter Property="ContextMenu" Value="{StaticResource cm}"/>
                     </Style>
                 </ListView.Resources>
+
                 <ListView.View>
                     <GridView AllowsColumnReorder="True">
-                        <GridViewColumn Header="スナップ日時" DisplayMemberBinding="{Binding SnappedTime, StringFormat={}yyyy/MM/dd HH:mm:ss}" Width="144"/>
-                        <GridViewColumn Header="サイズ" Width="80">
+                        <GridViewColumn Header="スナップ日時" Width="142"
+                                        DisplayMemberBinding="{Binding SnappedTime, StringFormat='yyyy/MM/dd HH:mm:ss'}"/>
+                        <GridViewColumn Header="サイズ" Width="72">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <!-- 右に寄せていこうな -->
@@ -159,6 +170,6 @@
                     </GridView>
                 </ListView.View>
             </ListView>
-        </Grid>
+        </v:CollectionPane>
     </Grid>
 </Window>
