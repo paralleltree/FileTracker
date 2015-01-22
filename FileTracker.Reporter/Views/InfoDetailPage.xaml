@@ -88,7 +88,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Text="記録日時"/>
-                <TextBox IsReadOnly="True" Text="{Binding Timestamp}"/>
+                <TextBox IsReadOnly="True" Text="{Binding Timestamp, StringFormat='yyyy/MM/dd HH:mm:ss'}"/>
 
                 <TextBlock Grid.Row="1" Text="実行時PID"/>
                 <TextBox Grid.Row="1" IsReadOnly="True" Text="{Binding ProcessId}"/>
