@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Reactive.Linq;
 using Livet;
 
 namespace FileTracker.Models
@@ -14,6 +15,7 @@ namespace FileTracker.Models
         public event EventHandler<ErrorEventArgs> WatcherDisabled;
 
 
+        private IDisposable FileChangedListener { get; set; }
         private FileSystemWatcher Watcher { get; set; }
 
         public string Path
@@ -79,8 +81,20 @@ namespace FileTracker.Models
                 }
             }
 
+
             Watcher = CreateWatcher(path);
-            Watcher.Changed += OnChanged;
+
+            FileChangedListener = Observable.FromEventPattern<FileSystemEventHandler, FileSystemEventArgs>(
+                h => Watcher.Changed += h,
+                h => Watcher.Changed -= h)
+                .GroupBy(p => p.EventArgs.Name)
+                .Subscribe(p =>
+                {
+                    p.Throttle(TimeSpan.FromSeconds(1))
+                        .Subscribe(q => OnChanged(q.Sender, q.EventArgs));
+                });
+
+            //Watcher.Changed += OnChanged;
             Watcher.Deleted += OnDeleted;
             Watcher.Renamed += OnRenamed;
             Watcher.Error += OnError;
@@ -103,6 +117,7 @@ namespace FileTracker.Models
         {
             string hash = Common.GetHash(e.Name);
             if (!TrackingFiles.ContainsKey(hash)) return;
+
             TrackingFiles[hash].Clear();
             TrackingFiles.Remove(hash);
         }
@@ -111,6 +126,7 @@ namespace FileTracker.Models
         {
             string hash = Common.GetHash(e.OldName);
             if (!TrackingFiles.ContainsKey(hash)) return;
+
             var item = TrackingFiles[hash];
             item.Rename(new FileInfo(e.FullPath));
             TrackingFiles.Remove(hash);
@@ -141,9 +157,10 @@ namespace FileTracker.Models
 
         public void Dispose()
         {
+            FileChangedListener.Dispose();
             if (this.Watcher != null)
             {
-                Watcher.Changed -= OnChanged;
+                //Watcher.Changed -= OnChanged;
                 Watcher.Deleted -= OnDeleted;
                 Watcher.Renamed -= OnRenamed;
                 Watcher.Error -= OnError;
