@@ -78,6 +78,14 @@ namespace FileTracker.Models
                     string hash = Common.GetHash(info.Name);
                     if (dic.ContainsKey(hash))
                         TrackingFiles.Add(hash, new FileItem(info, dic[hash]));
+                    dic.Remove(hash);
+                }
+
+                // ソースを失ったスナップファイルを削除
+                foreach (var item in dic)
+                {
+                    foreach (var file in item.Value)
+                        file.Value.Delete();
                 }
             }
 
