@@ -52,12 +52,12 @@ namespace FileTracker.Models
             {
                 // スナップフォルダからスナップファイルを検索する
                 var snapped = Directory.GetFiles(snapFolder)
-                    .Select(p => new { Path = p, Match = Regex.Match(p, @"\\(?<hash>[a-f0-9]+)_(?<date>\d{14})(\..+)?\Z") })
+                    .Select(p => new { Path = p, Match = Regex.Match(p, @"\\(?<hash>[a-f0-9]+)_(?<tick>\d+)(\..+)?\Z") })
                     .Where(p => p.Match.Success)
                     .Select(p => new
                     {
                         Hash = p.Match.Groups["hash"].Value,
-                        Date = DateTime.ParseExact(p.Match.Groups["date"].Value, Common.DateFormat, null),
+                        Date = new DateTime(long.Parse(p.Match.Groups["tick"].Value), DateTimeKind.Utc).ToLocalTime(),
                         Path = p.Path
                     });
 

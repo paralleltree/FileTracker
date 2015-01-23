@@ -41,7 +41,7 @@ namespace FileTracker.Models
             DateTime date = Source.LastWriteTime;
 
             string snapFolder = Common.GetSnapFolder(Source.Directory.FullName);
-            string dest = string.Format("{0}{1}_{2}{3}", snapFolder, Hash, date.ToString(Common.DateFormat), Source.Extension);
+            string dest = string.Format("{0}{1}_{2}{3}", snapFolder, Hash, date.ToUniversalTime().Ticks, Source.Extension);
 
             if (!Directory.Exists(snapFolder))
                 Common.CreateSnapFolder(Source.Directory.FullName);
