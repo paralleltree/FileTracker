@@ -104,10 +104,12 @@
     <Compile Include="Models\FileItem.cs" />
     <Compile Include="Models\FolderItem.cs" />
     <Compile Include="Models\Model.cs" />
+    <Compile Include="Models\SnapItem.cs" />
     <Compile Include="Models\TransmissionMessageEventArgs.cs" />
     <Compile Include="ViewModels\FileItemViewModel.cs" />
     <Compile Include="ViewModels\FolderItemViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\SnapItemViewModel.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
