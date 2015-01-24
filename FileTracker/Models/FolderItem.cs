@@ -12,9 +12,7 @@ namespace FileTracker.Models
 {
     public sealed class FolderItem : NotificationObject, IDisposable
     {
-        public event EventHandler<ErrorEventArgs> WatcherDisabled;
-
-
+        private Model Model { get; set; }
         private IDisposable FileChangedListener { get; set; }
         private FileSystemWatcher Watcher { get; set; }
 
@@ -41,10 +39,11 @@ namespace FileTracker.Models
         public DispatcherDictionary<string, FileItem> TrackingFiles { get; private set; }
 
 
-        public FolderItem(string path)
+        public FolderItem(Model model, string path)
         {
             if (!Directory.Exists(path)) throw new DirectoryNotFoundException("指定のディレクトリは見つかりませんでした。");
 
+            this.Model = model;
             TrackingFiles = new DispatcherDictionary<string, FileItem>(DispatcherHelper.UIDispatcher);
 
             string snapFolder = Common.GetSnapFolder(path);
@@ -62,22 +61,28 @@ namespace FileTracker.Models
                     });
 
                 // 同一ファイルごとに辞書に追加
-                var dic = new Dictionary<string, Dictionary<DateTime, FileInfo>>();
+                var dic = new Dictionary<string, Dictionary<DateTime, string>>();
                 foreach (var item in snapped)
                 {
                     if (!dic.ContainsKey(item.Hash))
-                        dic.Add(item.Hash, new Dictionary<DateTime, FileInfo>());
-                    dic[item.Hash].Add(item.Date, new FileInfo(item.Path));
+                        dic.Add(item.Hash, new Dictionary<DateTime, string>());
+                    dic[item.Hash].Add(item.Date, item.Path);
                 }
 
                 // 現在のフォルダ内のファイルをチェック
                 // スナップファイルが存在すればFileItemを追加
                 foreach (string file in Directory.GetFiles(path))
                 {
-                    var info = new FileInfo(file);
-                    string hash = Common.GetHash(info.Name);
+                    var src = new FileInfo(file);
+                    string hash = Common.GetHash(src.Name);
                     if (dic.ContainsKey(hash))
-                        TrackingFiles.Add(hash, new FileItem(info, dic[hash]));
+                    {
+                        var item = new FileItem(src);
+                        foreach (var snap in dic[hash])
+                            item.SnappedFiles.Add(snap.Key, new SnapItem(item, new FileInfo(snap.Value), snap.Key));
+
+                        TrackingFiles.Add(hash, item);
+                    }
                     dic.Remove(hash);
                 }
 
@@ -85,7 +90,7 @@ namespace FileTracker.Models
                 foreach (var item in dic)
                 {
                     foreach (var file in item.Value)
-                        file.Value.Delete();
+                        File.Delete(file.Value);
                 }
             }
 
@@ -117,7 +122,7 @@ namespace FileTracker.Models
 
             string hash = Common.GetHash(e.Name);
             if (!TrackingFiles.ContainsKey(hash))
-                TrackingFiles.Add(hash, new FileItem(file, Enumerable.Empty<KeyValuePair<DateTime, FileInfo>>()));
+                TrackingFiles.Add(hash, new FileItem(file));
             TrackingFiles[hash].Snap();
         }
 
@@ -157,11 +162,21 @@ namespace FileTracker.Models
             }
             catch (Exception)
             {
-                if (WatcherDisabled != null)
-                    WatcherDisabled(this, e);
+                RemoveFromCollection();
             }
         }
 
+
+        public void AddToCollection()
+        {
+            if (Model.TrackingFolders.Contains(this)) throw new InvalidOperationException("既にコレクションに追加されています。");
+            Model.TrackingFolders.Add(this);
+        }
+
+        public void RemoveFromCollection()
+        {
+            Model.TrackingFolders.Remove(this);
+        }
 
         public void Dispose()
         {

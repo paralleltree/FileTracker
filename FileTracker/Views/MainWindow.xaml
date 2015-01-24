@@ -66,8 +66,7 @@
                 <ListBox.Resources>
                     <ContextMenu x:Key="cm">
                         <MenuItem Header="削除" FontWeight="Bold"
-                                  Command="{Binding DataContext.RemoveFolderCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
-                                  CommandParameter="{Binding}"/>
+                                  Command="{Binding RemoveCommand}"/>
                     </ContextMenu>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="ContextMenu" Value="{StaticResource cm}"/>
@@ -136,11 +135,9 @@
                 <ListView.Resources>
                     <ContextMenu x:Key="cm">
                         <MenuItem Header="復元" FontWeight="Bold"
-                                  Command="{Binding DataContext.RestoreCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                  CommandParameter="{Binding Key}"/>
+                                  Command="{Binding RestoreCommand}"/>
                         <MenuItem Header="削除"
-                                  Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListView}}"
-                                  CommandParameter="{Binding Key}"/>
+                                  Command="{Binding RemoveCommand}"/>
                     </ContextMenu>
                     <!-- 右寄せにしたい…右寄せにしたくない？ -->
                     <Style TargetType="ListViewItem">
@@ -150,12 +147,12 @@
                 </ListView.Resources>
                 <ListView.View>
                     <GridView AllowsColumnReorder="True">
-                        <GridViewColumn Header="スナップ日時" DisplayMemberBinding="{Binding Key, StringFormat={}yyyy/MM/dd HH:mm:ss}" Width="144"/>
+                        <GridViewColumn Header="スナップ日時" DisplayMemberBinding="{Binding SnappedTime, StringFormat={}yyyy/MM/dd HH:mm:ss}" Width="144"/>
                         <GridViewColumn Header="サイズ" Width="80">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <!-- 右に寄せていこうな -->
-                                    <TextBlock Text="{Binding Value.Length, Converter={StaticResource ByteSizeConverter}}" HorizontalAlignment="Right"/>
+                                    <TextBlock Text="{Binding Length, Converter={StaticResource ByteSizeConverter}}" HorizontalAlignment="Right"/>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
