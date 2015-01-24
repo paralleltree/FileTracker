@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.ComponentModel;
 
 using Livet;
@@ -99,7 +100,33 @@ namespace FileTracker.ViewModels
 
         public void AddFolder(string parameter)
         {
-            Model.AddFolder(parameter);
+            string path = Regex.Replace(parameter, @"\\{2,}\Z", "");
+
+            if (!Directory.Exists(path))
+            {
+                Messenger.Raise(new InformationMessage()
+                {
+                    Text = "指定のフォルダは見つかりませんでした。",
+                    Caption = "登録エラー",
+                    Image = System.Windows.MessageBoxImage.Exclamation,
+                    MessageKey = "InformationMessage"
+                });
+                return;
+            }
+
+            if (TrackingFolders.Any(p => string.Equals(p.Path, path, StringComparison.OrdinalIgnoreCase)))
+            {
+                Messenger.Raise(new InformationMessage()
+                {
+                    Text = "既に登録されたフォルダです。",
+                    Caption = "登録エラー",
+                    Image = System.Windows.MessageBoxImage.Exclamation,
+                    MessageKey = "InformationMessage"
+                });
+                return;
+            }
+
+            new FolderItem(Model, path).AddToCollection();
         }
         #endregion
 
@@ -120,7 +147,7 @@ namespace FileTracker.ViewModels
 
         public void RemoveFolder(FolderItemViewModel parameter)
         {
-            Model.RemoveFolder(parameter.Source);
+            parameter.RemoveCommand.Execute();
         }
         #endregion
 

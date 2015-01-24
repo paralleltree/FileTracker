@@ -12,9 +12,7 @@ namespace FileTracker.Models
 {
     public sealed class FolderItem : NotificationObject, IDisposable
     {
-        public event EventHandler<ErrorEventArgs> WatcherDisabled;
-
-
+        private Model Model { get; set; }
         private IDisposable FileChangedListener { get; set; }
         private FileSystemWatcher Watcher { get; set; }
 
@@ -41,10 +39,11 @@ namespace FileTracker.Models
         public DispatcherDictionary<string, FileItem> TrackingFiles { get; private set; }
 
 
-        public FolderItem(string path)
+        public FolderItem(Model model, string path)
         {
             if (!Directory.Exists(path)) throw new DirectoryNotFoundException("指定のディレクトリは見つかりませんでした。");
 
+            this.Model = model;
             TrackingFiles = new DispatcherDictionary<string, FileItem>(DispatcherHelper.UIDispatcher);
 
             string snapFolder = Common.GetSnapFolder(path);
@@ -157,11 +156,21 @@ namespace FileTracker.Models
             }
             catch (Exception)
             {
-                if (WatcherDisabled != null)
-                    WatcherDisabled(this, e);
+                RemoveFromCollection();
             }
         }
 
+
+        public void AddToCollection()
+        {
+            if (Model.TrackingFolders.Contains(this)) throw new InvalidOperationException("既にコレクションに追加されています。");
+            Model.TrackingFolders.Add(this);
+        }
+
+        public void RemoveFromCollection()
+        {
+            Model.TrackingFolders.Remove(this);
+        }
 
         public void Dispose()
         {

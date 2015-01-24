@@ -66,8 +66,7 @@
                 <ListBox.Resources>
                     <ContextMenu x:Key="cm">
                         <MenuItem Header="削除" FontWeight="Bold"
-                                  Command="{Binding DataContext.RemoveFolderCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}"
-                                  CommandParameter="{Binding}"/>
+                                  Command="{Binding RemoveCommand}"/>
                     </ContextMenu>
                     <Style TargetType="ListBoxItem">
                         <Setter Property="ContextMenu" Value="{StaticResource cm}"/>

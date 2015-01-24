@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-
 using Livet;
 using Newtonsoft.Json;
 
@@ -30,14 +28,12 @@ namespace FileTracker.Models
 
         public event EventHandler<TransmissionMessageEventArgs> MessageRaised;
 
-        private DispatcherCollection<FolderItem> _trackingFolders { get; set; }
-        public ReadOnlyDispatcherCollection<FolderItem> TrackingFolders { get; private set; }
+        public DispatcherCollection<FolderItem> TrackingFolders { get; private set; }
 
 
         private Model()
         {
-            _trackingFolders = new DispatcherCollection<FolderItem>(DispatcherHelper.UIDispatcher);
-            TrackingFolders = new ReadOnlyDispatcherCollection<FolderItem>(_trackingFolders);
+            TrackingFolders = new DispatcherCollection<FolderItem>(DispatcherHelper.UIDispatcher);
 
             Initialize();
         }
@@ -50,50 +46,16 @@ namespace FileTracker.Models
                 foreach (string path in paths)
                 {
                     if (Directory.Exists(path))
-                        _trackingFolders.Add(new FolderItem(path));
+                        TrackingFolders.Add(new FolderItem(this, path));
                 }
             }
         }
 
 
-        public void AddFolder(string path)
-        {
-            path = Regex.Replace(path, @"\\{2,}\Z", "");
-
-            if (!Directory.Exists(path))
-            {
-                RaiseMessageRaised(new TransmissionMessageEventArgs("指定のフォルダは見つかりませんでした。"));
-                return;
-            }
-
-            if (TrackingFolders.Any(p => string.Equals(p.Path, path, StringComparison.OrdinalIgnoreCase)))
-            {
-                RaiseMessageRaised(new TransmissionMessageEventArgs("既に登録されたフォルダです。"));
-                return;
-            }
-
-            var item = new FolderItem(path);
-            item.WatcherDisabled += OnWatcherDisabled;
-            _trackingFolders.Add(item);
-        }
-
-        public void RemoveFolder(FolderItem item)
-        {
-            item.WatcherDisabled -= OnWatcherDisabled;
-            _trackingFolders.Remove(item);
-            item.Dispose();
-        }
-
-
-        private void RaiseMessageRaised(TransmissionMessageEventArgs e)
+        private void RaiseMessageRaised(string message)
         {
             if (MessageRaised != null)
-                MessageRaised(this, e);
-        }
-
-        private void OnWatcherDisabled(object sender, ErrorEventArgs e)
-        {
-            RemoveFolder((FolderItem)sender);
+                MessageRaised(this, new TransmissionMessageEventArgs(message));
         }
 
         public void Dispose()

@@ -74,5 +74,27 @@ namespace FileTracker.ViewModels
             TrackingFiles = ViewModelHelper.CreateReadOnlyDispatcherCollection(Source.TrackingFiles, p => new FileItemViewModel(p.Value), DispatcherHelper.UIDispatcher);
             Source.PropertyChanged += (sender, e) => RaisePropertyChanged(e.PropertyName);
         }
+
+
+        #region RemoveCommand
+        private ViewModelCommand _RemoveCommand;
+
+        public ViewModelCommand RemoveCommand
+        {
+            get
+            {
+                if (_RemoveCommand == null)
+                {
+                    _RemoveCommand = new ViewModelCommand(Remove);
+                }
+                return _RemoveCommand;
+            }
+        }
+
+        public void Remove()
+        {
+            Source.RemoveFromCollection();
+        }
+        #endregion
     }
 }
