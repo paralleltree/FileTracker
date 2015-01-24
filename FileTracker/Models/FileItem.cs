@@ -23,13 +23,19 @@ namespace FileTracker.Models
             }
         }
         private string Hash { get; set; }
-        public DispatcherDictionary<DateTime, FileInfo> SnappedFiles { get; private set; }
+        public DispatcherDictionary<DateTime, SnapItem> SnappedFiles { get; private set; }
 
-        public FileItem(FileInfo source, IEnumerable<KeyValuePair<DateTime, FileInfo>> snapped)
+
+        public FileItem(FileInfo source)
+            : this(source, Enumerable.Empty<KeyValuePair<DateTime, SnapItem>>())
+        {
+        }
+
+        public FileItem(FileInfo source, IEnumerable<KeyValuePair<DateTime, SnapItem>> snapped)
         {
             this.Source = source;
             this.Hash = Common.GetHash(Source.Name);
-            SnappedFiles = new DispatcherDictionary<DateTime, FileInfo>(DispatcherHelper.UIDispatcher);
+            SnappedFiles = new DispatcherDictionary<DateTime, SnapItem>(DispatcherHelper.UIDispatcher);
             foreach (var f in snapped)
                 SnappedFiles.Add(f);
         }
@@ -49,23 +55,22 @@ namespace FileTracker.Models
             if (SnappedFiles.ContainsKey(date))
             {
                 Source.CopyTo(dest, true);
-                SnappedFiles[date].Refresh();
+                SnappedFiles[date].SnappedFile.Refresh();
             }
             else
             {
                 Source.CopyTo(dest);
-                SnappedFiles.Add(new KeyValuePair<DateTime, FileInfo>(date, new FileInfo(dest)));
+                SnappedFiles.Add(date, new SnapItem(this, new FileInfo(dest), date));
             }
+
+            RaisePropertyChanged("Source");
         }
 
         public void Rename(FileInfo newfile)
         {
             string hash = Common.GetHash(newfile.Name);
             foreach (var f in SnappedFiles)
-                f.Value.MoveTo(f.Value.FullName.Replace(this.Hash, hash));
-
-            foreach (DateTime key in SnappedFiles.Keys.ToList())
-                SnappedFiles[key] = new FileInfo(SnappedFiles[key].FullName.Replace(this.Hash, hash));
+                f.Value.SnappedFile.MoveTo(f.Value.SnappedFile.FullName.Replace(this.Hash, hash));
 
             this.Source = newfile;
             this.Hash = hash;
@@ -73,23 +78,9 @@ namespace FileTracker.Models
 
         public void Clear()
         {
-            foreach (var f in SnappedFiles)
-                f.Value.Delete();
-
-            SnappedFiles.Clear();
-        }
-
-        public void Remove(DateTime date)
-        {
-            if (!SnappedFiles.ContainsKey(date)) throw new ArgumentException("指定の日時のスナップファイルは検出されませんでした。");
-            SnappedFiles[date].Delete();
-            SnappedFiles.Remove(date);
-        }
-
-        public void Restore(DateTime date)
-        {
-            if (!SnappedFiles.ContainsKey(date)) throw new ArgumentException("指定の日時のスナップファイルは検出されませんでした。");
-            SnappedFiles[date].CopyTo(string.Format(@"{0}\{1}_{2}{3}", Source.Directory.FullName, Source.Name.Replace(Source.Extension, ""), date.ToString(Common.DateFormat), Source.Extension));
+            var list = SnappedFiles.ToList();
+            foreach (var item in list)
+                item.Value.Remove();
         }
     }
 }

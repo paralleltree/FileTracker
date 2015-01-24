@@ -8,7 +8,7 @@ using Livet;
 using Livet.Commands;
 using Livet.Messaging;
 using Livet.Messaging.IO;
-using Livet.EventListeners;
+using Livet.EventListeners.WeakEvents;
 using Livet.Messaging.Windows;
 
 using FileTracker.Models;
@@ -59,16 +59,27 @@ namespace FileTracker.ViewModels
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
-        public FileItem Source { get; private set; }
+        private FileItem Source { get; set; }
         public string Name { get { return Source.Source.Name; } }
         public DateTime LastWriteTime { get { return Source.Source.LastWriteTime; } }
-        public ReadOnlyDispatcherCollection<KeyValuePair<DateTime, System.IO.FileInfo>> SnappedFiles { get; private set; }
+        public ReadOnlyDispatcherCollection<SnapItemViewModel> SnappedFiles { get; private set; }
 
         public FileItemViewModel(FileItem source)
         {
             this.Source = source;
-            SnappedFiles = ViewModelHelper.CreateReadOnlyDispatcherCollection(Source.SnappedFiles, p => p, DispatcherHelper.UIDispatcher);
-            Source.PropertyChanged += (sender, e) => RaisePropertyChanged(e.PropertyName);
+            SnappedFiles = ViewModelHelper.CreateReadOnlyDispatcherCollection(Source.SnappedFiles, p => new SnapItemViewModel(p.Value), DispatcherHelper.UIDispatcher);
+            CompositeDisposable.Add(new PropertyChangedWeakEventListener(Source, (sender, e) =>
+            {
+                switch (e.PropertyName)
+                {
+                    case "Source":
+                        RaisePropertyChanged("Source");
+                        RaisePropertyChanged("Name");
+                        RaisePropertyChanged("LastWriteTime");
+                        break;
+                }
+
+            }));
         }
 
 
@@ -90,32 +101,6 @@ namespace FileTracker.ViewModels
         public void Snap()
         {
             Source.Snap();
-        }
-        #endregion
-
-        #region RemoveCommand
-        private ListenerCommand<DateTime> _RemoveCommand;
-
-        public ListenerCommand<DateTime> RemoveCommand
-        {
-            get
-            {
-                if (_RemoveCommand == null)
-                {
-                    _RemoveCommand = new ListenerCommand<DateTime>(Remove, CanRemove);
-                }
-                return _RemoveCommand;
-            }
-        }
-
-        public bool CanRemove()
-        {
-            return SnappedFiles.Count > 0;
-        }
-
-        public void Remove(DateTime parameter)
-        {
-            Source.Remove(parameter);
         }
         #endregion
 
@@ -144,33 +129,5 @@ namespace FileTracker.ViewModels
             Source.Clear();
         }
         #endregion
-
-        #region RestoreCommand
-        private ListenerCommand<DateTime> _RestoreCommand;
-
-        public ListenerCommand<DateTime> RestoreCommand
-        {
-            get
-            {
-                if (_RestoreCommand == null)
-                {
-                    _RestoreCommand = new ListenerCommand<DateTime>(Restore, CanRestore);
-                }
-                return _RestoreCommand;
-            }
-        }
-
-        public bool CanRestore()
-        {
-            return SnappedFiles.Count > 0;
-        }
-
-        public void Restore(DateTime parameter)
-        {
-            Source.Restore(parameter);
-        }
-        #endregion
-
-
     }
 }
