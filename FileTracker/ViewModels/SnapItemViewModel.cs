@@ -108,6 +108,21 @@ namespace FileTracker.ViewModels
 
         public void Restore()
         {
+            if (File.Exists(Source.Destination))
+            {
+                var msg = new ConfirmationMessage()
+                {
+                    Text = "既に同じ復元ファイルが存在します。\n上書きして復元しますか？",
+                    Caption = "ファイルの復元",
+                    Image = System.Windows.MessageBoxImage.Question,
+                    Button = System.Windows.MessageBoxButton.YesNo,
+                    MessageKey = "ConfirmationMessage"
+                };
+                DispatcherHelper.UIDispatcher.Invoke(() => Messenger.GetResponse(msg));
+
+                if (!msg.Response.HasValue || !msg.Response.Value) return;
+            }
+
             Source.Restore();
         }
         #endregion

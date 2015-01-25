@@ -100,6 +100,21 @@ namespace FileTracker.ViewModels
 
         public void Snap()
         {
+            if (SnappedFiles.Any(p => p.SnappedTime == Source.Source.LastWriteTime))
+            {
+                var msg = new ConfirmationMessage()
+                {
+                    Text = "同じスナップファイルが存在します。\n上書きしてスナップしますか？",
+                    Caption = "ファイルのスナップ",
+                    Image = System.Windows.MessageBoxImage.Question,
+                    Button = System.Windows.MessageBoxButton.YesNo,
+                    MessageKey = "ConfirmationMessage"
+                };
+                DispatcherHelper.UIDispatcher.Invoke(() => Messenger.GetResponse(msg));
+
+                if (!msg.Response.HasValue || !msg.Response.Value) return;
+            }
+
             Source.Snap();
         }
         #endregion
