@@ -3,15 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-
 using Livet;
 using Newtonsoft.Json;
 
 namespace FileTracker.Models
 {
-    public delegate void TransmissionMessageEventHandler(object sender, TransmissionMessageEventArgs e);
-
     public sealed class Model : NotificationObject, IDisposable
     {
         private static Model _model;
@@ -30,7 +26,7 @@ namespace FileTracker.Models
 
         private readonly string TargetsPath = "targets.json";
 
-        public event TransmissionMessageEventHandler MessageRaised;
+        public event EventHandler<TransmissionMessageEventArgs> MessageRaised;
 
         public DispatcherCollection<FolderItem> TrackingFolders { get; private set; }
 
@@ -38,6 +34,7 @@ namespace FileTracker.Models
         private Model()
         {
             TrackingFolders = new DispatcherCollection<FolderItem>(DispatcherHelper.UIDispatcher);
+
             Initialize();
         }
 
@@ -49,41 +46,16 @@ namespace FileTracker.Models
                 foreach (string path in paths)
                 {
                     if (Directory.Exists(path))
-                        TrackingFolders.Add(new FolderItem(path));
+                        TrackingFolders.Add(new FolderItem(this, path));
                 }
             }
         }
 
 
-        public void AddFolder(string path)
-        {
-            path = Regex.Replace(path, @"\\{2,}\Z", "");
-
-            if (!Directory.Exists(path))
-            {
-                RaiseMessageRaised(new TransmissionMessageEventArgs("指定のフォルダは見つかりませんでした。"));
-                return;
-            }
-
-            if (TrackingFolders.Any(p => string.Equals(p.Path, path, StringComparison.OrdinalIgnoreCase)))
-            {
-                RaiseMessageRaised(new TransmissionMessageEventArgs("既に登録されたフォルダです。"));
-                return;
-            }
-
-            TrackingFolders.Add(new FolderItem(path));
-        }
-
-        public void RemoveFolder(FolderItem item)
-        {
-            TrackingFolders.Remove(item);
-        }
-
-
-        private void RaiseMessageRaised(TransmissionMessageEventArgs e)
+        private void RaiseMessageRaised(string message)
         {
             if (MessageRaised != null)
-                MessageRaised(this, e);
+                MessageRaised(this, new TransmissionMessageEventArgs(message));
         }
 
         public void Dispose()

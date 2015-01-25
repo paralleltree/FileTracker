@@ -17,6 +17,7 @@ FileTrackerは、ファイルに加えられた変更を追跡し、必要に応
 |:----------|:----------|
 |Livet      |zlib/libpng|
 |Json.NET   |MIT License|
+|Reactive Extensions|Apache License 2.0|
 
 以下に条文を示します。
 

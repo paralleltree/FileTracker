@@ -2,35 +2,36 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using System.ComponentModel;
 
 using Livet;
 using Livet.Commands;
 using Livet.Messaging;
 using Livet.Messaging.IO;
-using Livet.EventListeners.WeakEvents;
+using Livet.EventListeners;
 using Livet.Messaging.Windows;
 
 using FileTracker.Models;
 
 namespace FileTracker.ViewModels
 {
-    public class FileItemViewModel : ViewModel
+    public class SnapItemViewModel : ViewModel
     {
-        /* コマンド、プロパティの定義にはそれぞれ 
-         * 
+        /* コマンド、プロパティの定義にはそれぞれ
+         *
          *  lvcom   : ViewModelCommand
          *  lvcomn  : ViewModelCommand(CanExecute無)
          *  llcom   : ListenerCommand(パラメータ有のコマンド)
          *  llcomn  : ListenerCommand(パラメータ有のコマンド・CanExecute無)
          *  lprop   : 変更通知プロパティ(.NET4.5ではlpropn)
-         *  
+         *
          * を使用してください。
-         * 
+         *
          * Modelが十分にリッチであるならコマンドにこだわる必要はありません。
          * View側のコードビハインドを使用しないMVVMパターンの実装を行う場合でも、ViewModelにメソッドを定義し、
          * LivetCallMethodActionなどから直接メソッドを呼び出してください。
-         * 
+         *
          * ViewModelのコマンドを呼び出せるLivetのすべてのビヘイビア・トリガー・アクションは
          * 同様に直接ViewModelのメソッドを呼び出し可能です。
          */
@@ -42,70 +43,77 @@ namespace FileTracker.ViewModels
         /* Modelからの変更通知などの各種イベントを受け取る場合は、PropertyChangedEventListenerや
          * CollectionChangedEventListenerを使うと便利です。各種ListenerはViewModelに定義されている
          * CompositeDisposableプロパティ(LivetCompositeDisposable型)に格納しておく事でイベント解放を容易に行えます。
-         * 
+         *
          * ReactiveExtensionsなどを併用する場合は、ReactiveExtensionsのCompositeDisposableを
          * ViewModelのCompositeDisposableプロパティに格納しておくのを推奨します。
-         * 
+         *
          * LivetのWindowテンプレートではViewのウィンドウが閉じる際にDataContextDisposeActionが動作するようになっており、
          * ViewModelのDisposeが呼ばれCompositeDisposableプロパティに格納されたすべてのIDisposable型のインスタンスが解放されます。
-         * 
+         *
          * ViewModelを使いまわしたい時などは、ViewからDataContextDisposeActionを取り除くか、発動のタイミングをずらす事で対応可能です。
          */
 
         /* UIDispatcherを操作する場合は、DispatcherHelperのメソッドを操作してください。
          * UIDispatcher自体はApp.xaml.csでインスタンスを確保してあります。
-         * 
+         *
          * LivetのViewModelではプロパティ変更通知(RaisePropertyChanged)やDispatcherCollectionを使ったコレクション変更通知は
          * 自動的にUIDispatcher上での通知に変換されます。変更通知に際してUIDispatcherを操作する必要はありません。
          */
 
-        private FileItem Source { get; set; }
-        public string Name { get { return Source.Source.Name; } }
-        public DateTime LastWriteTime { get { return Source.Source.LastWriteTime; } }
-        public ReadOnlyDispatcherCollection<SnapItemViewModel> SnappedFiles { get; private set; }
+        private SnapItem Source { get; set; }
+        public DateTime SnappedTime { get { return Source.SnappedTime; } }
+        public long Length { get { return Source.SnappedFile.Length; } }
 
-        public FileItemViewModel(FileItem source)
+        public SnapItemViewModel(SnapItem source)
         {
             this.Source = source;
-            SnappedFiles = ViewModelHelper.CreateReadOnlyDispatcherCollection(Source.SnappedFiles, p => new SnapItemViewModel(p.Value), DispatcherHelper.UIDispatcher);
-            CompositeDisposable.Add(new PropertyChangedWeakEventListener(Source, (sender, e) =>
-            {
-                switch (e.PropertyName)
-                {
-                    case "Source":
-                        RaisePropertyChanged("Source");
-                        RaisePropertyChanged("Name");
-                        RaisePropertyChanged("LastWriteTime");
-                        break;
-                }
-
-            }));
         }
 
 
-        #region SnapCommand
-        private ViewModelCommand _SnapCommand;
+        #region RemoveCommand
+        private ViewModelCommand _RemoveCommand;
 
-        public ViewModelCommand SnapCommand
+        public ViewModelCommand RemoveCommand
         {
             get
             {
-                if (_SnapCommand == null)
+                if (_RemoveCommand == null)
                 {
-                    _SnapCommand = new ViewModelCommand(Snap);
+                    _RemoveCommand = new ViewModelCommand(Remove);
                 }
-                return _SnapCommand;
+                return _RemoveCommand;
             }
         }
 
-        public void Snap()
+        public void Remove()
         {
-            if (SnappedFiles.Any(p => p.SnappedTime == Source.Source.LastWriteTime))
+            Source.Remove();
+        }
+        #endregion
+
+        #region RestoreCommand
+        private ViewModelCommand _RestoreCommand;
+
+        public ViewModelCommand RestoreCommand
+        {
+            get
+            {
+                if (_RestoreCommand == null)
+                {
+                    _RestoreCommand = new ViewModelCommand(Restore);
+                }
+                return _RestoreCommand;
+            }
+        }
+
+        public void Restore()
+        {
+            if (File.Exists(Source.Destination))
             {
                 var msg = new ConfirmationMessage()
                 {
-                    Text = "同じスナップファイルが存在します。\n上書きしてスナップしますか？",
-                    Caption = "ファイルのスナップ",
+                    Text = "既に同じ復元ファイルが存在します。\n上書きして復元しますか？",
+                    Caption = "ファイルの復元",
                     Image = System.Windows.MessageBoxImage.Question,
                     Button = System.Windows.MessageBoxButton.YesNo,
                     MessageKey = "ConfirmationMessage"
@@ -115,33 +123,7 @@ namespace FileTracker.ViewModels
                 if (!msg.Response.HasValue || !msg.Response.Value) return;
             }
 
-            Source.Snap();
-        }
-        #endregion
-
-        #region ClearCommand
-        private ViewModelCommand _ClearCommand;
-
-        public ViewModelCommand ClearCommand
-        {
-            get
-            {
-                if (_ClearCommand == null)
-                {
-                    _ClearCommand = new ViewModelCommand(Clear, CanClear);
-                }
-                return _ClearCommand;
-            }
-        }
-
-        public bool CanClear()
-        {
-            return SnappedFiles.Count > 0;
-        }
-
-        public void Clear()
-        {
-            Source.Clear();
+            Source.Restore();
         }
         #endregion
     }
