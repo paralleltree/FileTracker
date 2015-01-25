@@ -167,6 +167,15 @@ namespace FileTracker.Models
         }
 
 
+        public void Clear()
+        {
+            string snapFolder = Common.GetSnapFolder(Path);
+            if (Directory.Exists(snapFolder))
+                Directory.Delete(snapFolder, true);
+
+            TrackingFiles.Clear();
+        }
+
         public void AddToCollection()
         {
             if (Model.TrackingFolders.Contains(this)) throw new InvalidOperationException("既にコレクションに追加されています。");
