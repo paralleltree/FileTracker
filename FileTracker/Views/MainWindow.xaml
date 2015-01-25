@@ -26,6 +26,7 @@
         </Style>
         <Style TargetType="TextBlock">
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            <Setter Property="ToolTip" Value="{Binding Text, RelativeSource={RelativeSource Self}}"/>
         </Style>
     </Window.Resources>
 
@@ -102,6 +103,7 @@
 
                 <TextBox Margin="1" Name="PathText" Text="" />
                 <Button Grid.Column="1" Margin="1" Content="登録"
+                        ToolTip="トラックするフォルダを登録します。"
                         Command="{Binding AddFolderCommand}"
                         CommandParameter="{Binding Text, ElementName=PathText}"/>
             </Grid>
