@@ -93,6 +93,32 @@ namespace FileTracker.ViewModels
 
         public void Remove()
         {
+            if (TrackingFiles.Any(p => p.SnappedFiles.Count > 0))
+            {
+                var msg = new ConfirmationMessage()
+                {
+                    Text = "スナップファイルが残っているファイルがあります。\n解除と共にスナップファイルを削除しますか？",
+                    Caption = "フォルダ登録解除",
+                    Image = System.Windows.MessageBoxImage.Question,
+                    Button = System.Windows.MessageBoxButton.YesNoCancel,
+                    MessageKey = "ConfirmationMessage"
+                };
+                DispatcherHelper.UIDispatcher.Invoke(() => Messenger.GetResponse(msg));
+
+                switch (msg.Response)
+                {
+                    case true:
+                        Source.Clear();
+                        break;
+
+                    case false:
+                        break;
+
+                    case null:
+                        return;
+                }
+            }
+
             Source.RemoveFromCollection();
         }
         #endregion

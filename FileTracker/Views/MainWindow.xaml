@@ -72,6 +72,12 @@
                 <ListView ItemsSource="{Binding TrackingFolders}" SelectionMode="Single">
                     <ListView.Resources>
                         <ContextMenu x:Key="cm">
+                            <i:Interaction.Triggers>
+                                <l:InteractionMessageTrigger MessageKey="ConfirmationMessage" Messenger="{Binding Messenger}">
+                                    <l:ConfirmationDialogInteractionMessageAction/>
+                                </l:InteractionMessageTrigger>
+                            </i:Interaction.Triggers>
+
                             <MenuItem Header="解除" FontWeight="Bold"
                                       Command="{Binding RemoveCommand}"/>
                         </ContextMenu>
@@ -119,6 +125,12 @@
                         <Setter Property="ContextMenu">
                             <Setter.Value>
                                 <ContextMenu>
+                                    <i:Interaction.Triggers>
+                                        <l:InteractionMessageTrigger MessageKey="ConfirmationMessage" Messenger="{Binding Messenger}">
+                                            <l:ConfirmationDialogInteractionMessageAction/>
+                                        </l:InteractionMessageTrigger>
+                                    </i:Interaction.Triggers>
+
                                     <MenuItem Header="スナップする" FontWeight="Bold" Command="{Binding SnapCommand}"/>
                                     <MenuItem Header="スナップファイルをクリア" Command="{Binding ClearCommand}"/>
                                 </ContextMenu>
@@ -145,6 +157,12 @@
             <ListView ItemsSource="{Binding SnappedFiles}" SelectionMode="Single">
                 <ListView.Resources>
                     <ContextMenu x:Key="cm">
+                        <i:Interaction.Triggers>
+                            <l:InteractionMessageTrigger MessageKey="ConfirmationMessage" Messenger="{Binding Messenger}">
+                                <l:ConfirmationDialogInteractionMessageAction/>
+                            </l:InteractionMessageTrigger>
+                        </i:Interaction.Triggers>
+
                         <MenuItem Header="復元" FontWeight="Bold"
                                   Command="{Binding RestoreCommand}"/>
                         <MenuItem Header="削除"
