@@ -32,6 +32,18 @@ namespace FileTracker.Views.Behaviors
         public static readonly DependencyProperty DescriptionProperty =
             DependencyProperty.Register("Description", typeof(string), typeof(WatermarkBehavior), new PropertyMetadata("", OnDependencyPropertyChanged));
 
+        /// <summary>
+        /// ウォーターマークの前景色を表すブラシを取得、設定します。
+        /// </summary>
+        public Brush Foreground
+        {
+            get { return (Brush)GetValue(ForegroundProperty); }
+            set { SetValue(ForegroundProperty, value); }
+        }
+
+        public static readonly DependencyProperty ForegroundProperty =
+            DependencyProperty.Register("Foreground", typeof(Brush), typeof(WatermarkBehavior), new PropertyMetadata(Brushes.DarkGray, OnDependencyPropertyChanged));
+
 
         protected override void OnAttached()
         {
@@ -97,6 +109,13 @@ namespace FileTracker.Views.Behaviors
                 Source = this
             };
             BindingOperations.SetBinding(Watermark, Label.ContentProperty, desc);
+
+            var foreground = new Binding()
+            {
+                Path = new PropertyPath("Foreground"),
+                Source = this
+            };
+            BindingOperations.SetBinding(Watermark, Label.ForegroundProperty, foreground);
 
             var width = new Binding()
             {
