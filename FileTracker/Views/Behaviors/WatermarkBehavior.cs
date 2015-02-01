@@ -44,12 +44,26 @@ namespace FileTracker.Views.Behaviors
         public static readonly DependencyProperty ForegroundProperty =
             DependencyProperty.Register("Foreground", typeof(Brush), typeof(WatermarkBehavior), new PropertyMetadata(Brushes.DarkGray, OnDependencyPropertyChanged));
 
+        /// <summary>
+        /// フォーカス時にウォーターマークを非表示にするかどうかを取得、設定します。
+        /// </summary>
+        public bool HiddenWhenFocused
+        {
+            get { return (bool)GetValue(HiddenWhenGetFocusProperty); }
+            set { SetValue(HiddenWhenGetFocusProperty, value); }
+        }
+
+        public static readonly DependencyProperty HiddenWhenGetFocusProperty =
+            DependencyProperty.Register("HiddenWhenFocused", typeof(bool), typeof(WatermarkBehavior), new PropertyMetadata(false, OnDependencyPropertyChanged));
+
 
         protected override void OnAttached()
         {
             base.OnAttached();
             this.AssociatedObject.Loaded += OnLoaded;
             this.AssociatedObject.TextChanged += OnTextChanged;
+            this.AssociatedObject.GotFocus += OnFocusChanged;
+            this.AssociatedObject.LostFocus += OnFocusChanged;
 
             if (this.AssociatedObject.IsLoaded) Initialize();
         }
@@ -59,6 +73,8 @@ namespace FileTracker.Views.Behaviors
             base.OnDetaching();
             this.AssociatedObject.Loaded -= OnLoaded;
             this.AssociatedObject.TextChanged -= OnTextChanged;
+            this.AssociatedObject.GotFocus -= OnFocusChanged;
+            this.AssociatedObject.LostFocus -= OnFocusChanged;
 
             BindingOperations.ClearAllBindings(Watermark);
         }
@@ -74,12 +90,18 @@ namespace FileTracker.Views.Behaviors
             Refresh();
         }
 
+        private void OnFocusChanged(object sender, RoutedEventArgs e)
+        {
+            Refresh();
+        }
+
+
         private void Refresh()
         {
             TextBox textbox = this.AssociatedObject;
             if (textbox == null) return;
 
-            if (string.IsNullOrEmpty(textbox.Text))
+            if (string.IsNullOrEmpty(textbox.Text) && (!textbox.IsFocused || !HiddenWhenFocused))
             {
                 // TextBoxの背景に直接Brushを指定する
                 textbox.Background = WatermarkBrush;
