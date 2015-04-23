@@ -7,6 +7,7 @@
         xmlns:v="clr-namespace:FileTracker.Views"
         xmlns:vm="clr-namespace:FileTracker.ViewModels"
         xmlns:conv="clr-namespace:FileTracker.Views.Converters"
+        xmlns:b="clr-namespace:FileTracker.Views.Behaviors"
         Title="FileTracker"
         Icon="../Resources/MainIcon.ico"
         Background="Gray"
@@ -107,7 +108,11 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBox Margin="1" Name="PathText" Text="" />
+                <TextBox Margin="1" Name="PathText" Text="">
+                    <i:Interaction.Behaviors>
+                        <b:WatermarkBehavior Description="C:\Users\someone\Documents\..."/>
+                    </i:Interaction.Behaviors>
+                </TextBox>
                 <Button Grid.Column="1" Margin="1" Content="登録"
                         ToolTip="トラックするフォルダを登録します。"
                         Command="{Binding AddFolderCommand}"
